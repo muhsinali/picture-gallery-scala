@@ -1,10 +1,12 @@
 logs
 target
+public
 /.idea
 /.idea_modules
 /.classpath
 /.project
 /.settings
+/.sbtserver
 /RUNNING_PID
 /bin
 /libexec

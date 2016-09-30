@@ -1,0 +1,29 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>@title</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("bootstrap/css/bootstrap.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+    </head>
+    <body class="container">
+
+
+        @*************
+            Content
+        *************@
+        @content
+
+        <footer>
+            <p>
+            Created by Muhsin Ali.<br>
+            The images used have been obtained under the Creative Commons (CC0) license.<br>
+            The descriptions of each place have been obtained from Wikipedia under the Creative Commons Attribution-ShareAlike License 3.0.
+            </p>
+        </footer>
+    </body>
+</html>
