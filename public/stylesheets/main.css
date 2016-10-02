@@ -1,0 +1,42 @@
+body {
+    background-color: #EEEEEE;
+}
+
+
+h1 {
+    text-align: center;
+    font-family: Times;
+    font-size: 72px;
+}
+
+
+.view-buttons {
+    width: inherit;
+    text-align: right;
+    border-bottom: 2px solid black;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+
+h4 {
+    font-family: Georgia;
+    font-size: 20px;
+    margin: 50px 0px 8px;
+}
+
+p {
+    font-family: Arial;
+    font-size: 15px;
+}
+
+footer {
+    border-top: 2px solid black;
+    margin: 0px 0px;
+    padding: 10px 5px 20px;
+    clear: both;
+}
+
+footer p {
+    font-size: 13px;
+}

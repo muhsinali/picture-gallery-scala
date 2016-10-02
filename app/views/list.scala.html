@@ -1,35 +1,25 @@
 @(places: List[Place])
 
 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>List view</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("bootstrap/css/bootstrap.min.css")">
-</head>
-<body>
-    <p>Hello, this is list</p>
-
-
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Location</th>
-                <th>Country</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for(currentPlace <- places){
-                <tr>
-                    <td>Cheese</td>
-                    <td>Edam</td>
-                    <td>Blue</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</body>
-</html>
+@main("List view"){
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/list.css")">
+}{
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Location</th>
+        <th>Country</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for(currentPlace <- places){
+    <tr>
+        <td>@currentPlace.id</td>
+        <td>@currentPlace.name</td>
+        <td>@currentPlace.country</td>
+    </tr>
+    }
+    </tbody>
+</table>
+}

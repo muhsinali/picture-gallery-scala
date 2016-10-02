@@ -1,0 +1,13 @@
+.glyphicon-trash:hover {
+    cursor: pointer;
+}
+
+th {
+    font-family: Arial;
+    font-size: 16px;
+}
+
+a {
+    font-family: Arial;
+    font-size: 15px;
+}

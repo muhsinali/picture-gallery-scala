@@ -24,12 +24,11 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
 
   def index = Action { implicit request =>
     val jsonInfo = Json.prettyPrint(Json.toJson(LibraryRepository.placesList))
-    Ok(views.html.main("")(Html(jsonInfo)))
+    Ok(views.html.main("")(Html(""))(Html(jsonInfo)))
   }
 
   // TODO this is blocking, find out how to make it non-blocking
-  def showList =
-    Action { implicit request =>
+  def showList = Action { implicit request =>
     Ok(views.html.list(Await.result(placeController.retrieveAllPlaces(), 1 seconds)))
   }
 

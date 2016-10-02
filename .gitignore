@@ -1,6 +1,8 @@
 logs
 target
-public
+public/bootstrap
+public/images
+public/javascripts
 /.idea
 /.idea_modules
 /.classpath
