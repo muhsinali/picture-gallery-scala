@@ -5,7 +5,7 @@ import play.api.mvc.{Action, Controller}
 import models.Place
 import models.dal.LibraryRepository
 import play.twirl.api.Html
-import play.modules.reactivemongo._
+
 
 /**
   * Created by Muhsin Ali on 29/09/2016.
