@@ -4,6 +4,8 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.Application.index
+GET     /list                       controllers.Application.showList
+GET     /grid                       controllers.Application.showGrid
 
 
 POST     /places/add                controllers.PlaceController.create(id: Int, name: String, country: String)

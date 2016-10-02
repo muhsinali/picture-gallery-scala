@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import models.Place
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, Controller}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
@@ -31,6 +31,19 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
       Ok(s"lastError: $lastError\n")
   }
 
+  def retrieveAllPlaces(): Future[List[Place]] = {
+    // let's do our query
+    val placesList: Future[List[Place]] = placesFuture.flatMap {
+      // find all Places with name `name`
+      _.find(Json.obj()).
+        // perform the query and get a cursor of JsObject
+        cursor[Place](ReadPreference.primary).
+        // Collect the results as a list
+        collect[List]()
+    }
+    placesList
+  }
+
   def findByName(name: String) = Action.async {
     // let's do our query
     val placesList: Future[List[Place]] = placesFuture.flatMap {
@@ -42,8 +55,6 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
         collect[List]()
     }
 
-    placesList.map { places =>
-      Ok(Json.toJson(places))
-    }
+    placesList.map { places => Ok(Json.toJson(places))}
   }
 }

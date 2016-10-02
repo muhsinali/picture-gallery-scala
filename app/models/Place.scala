@@ -8,6 +8,7 @@ import play.api.libs.json.Json
 
 case class Place (id: Int, name: String, country: String)
 
+// TODO read up on this in more detail
 object Place {
   implicit val formatter = Json.format[Place]
 }
