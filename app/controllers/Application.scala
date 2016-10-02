@@ -5,7 +5,6 @@ import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import models.Place
-import models.dal.LibraryRepository
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.twirl.api.Html
 
@@ -22,8 +21,9 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
 
   val placeController = new PlaceController(reactiveMongoApi)
 
+  // TODO this is blocking, find out how to make it non-blocking
   def index = Action { implicit request =>
-    val jsonInfo = Json.prettyPrint(Json.toJson(LibraryRepository.placesList))
+    val jsonInfo = Json.prettyPrint(Json.toJson(Await.result(placeController.retrieveAllPlaces(), 1 seconds)))
     Ok(views.html.main("")(Html(""))(Html(jsonInfo)))
   }
 
