@@ -28,10 +28,10 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
   }
 
   // TODO this is blocking, find out how to make it non-blocking
-  def showList = Action { implicit request =>
+  def showList() = Action { implicit request =>
     Ok(views.html.list(Await.result(placeController.retrieveAllPlaces(), 1 seconds)))
   }
 
-  def showGrid = TODO
+  def showGrid() = TODO
 }
 

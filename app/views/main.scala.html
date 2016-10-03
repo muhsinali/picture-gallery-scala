@@ -14,13 +14,13 @@
 <body class="container">
     @if(flash.get("success").nonEmpty){
         <div class="alert alert-success">
-            @flash.get("success").getOrElse("")
+            @flash.get("success")
         </div>
     }
 
     @if(flash.get("error").nonEmpty){
         <div class="alert alert-danger">
-            @flash.get("error").getOrElse("")
+            @flash.get("error")
         </div>
     }
 

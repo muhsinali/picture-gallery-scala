@@ -10,6 +10,7 @@
         <th>ID</th>
         <th>Location</th>
         <th>Country</th>
+        <th>Picture</th>
     </tr>
     </thead>
     <tbody>
@@ -18,6 +19,7 @@
         <td>@currentPlace.id</td>
         <td>@currentPlace.name</td>
         <td>@currentPlace.country</td>
+        <td><img style="height: 50px" src="@routes.PlaceController.retrievePictureOfPlace(currentPlace.id)"/> </td>
     </tr>
     }
     </tbody>

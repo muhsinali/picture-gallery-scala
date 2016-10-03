@@ -1,0 +1,8 @@
+{
+  _id: 7,
+  name: 'Singapore',
+  country: 'Singapore',
+  description: 'Singapore, the world’s only island-city state, is a global financial centre with a tropical climate and multicultural population. It is also known for its cultural diversity and eclectic street fare.',
+  picture: './public/images/places/singapore.jpg',
+  content_type: 'image/jpeg'
+}

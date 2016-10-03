@@ -1,0 +1,8 @@
+{
+  _id: 2,
+  name: 'Paris',
+  country: 'France',
+  description: 'Paris is the capital and most populous city of France. Situated on the river Seine in northern metropolitan France, it is in the centre of the Île-de-France region, also known as the région parisienne, "Paris Region".',
+  picture: './public/images/places/paris.jpg',
+  content_type: 'image/jpeg'
+}

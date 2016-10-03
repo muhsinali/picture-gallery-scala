@@ -1,8 +1,8 @@
 logs
 target
 public/bootstrap
-public/images
 public/javascripts
+**/.DS_Store
 /.idea
 /.idea_modules
 /.classpath

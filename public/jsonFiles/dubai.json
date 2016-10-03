@@ -1,0 +1,8 @@
+{
+  _id: 3,
+  name: 'Dubai',
+  country: 'United Arab Emirates',
+  description: 'Dubai is the most populous city in the United Arab Emirates (UAE) and is the capital of the Emirate of Dubai, one of the seven emirates that make up the country. Dubai has emerged as a global city and business hub of the Middle East.',
+  picture: './public/images/places/dubai.jpg',
+  content_type: 'image/jpeg'
+}

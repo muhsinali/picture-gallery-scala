@@ -1,0 +1,8 @@
+{
+  _id: 1,
+  name: 'London',
+  country: 'United Kingdom',
+  description: 'London is the capital and most populous city of the United Kingdom. On the River Thames, London has been a major settlement for two millennia. It was founded by the Romans, who named it Londinium.',
+  picture: './public/images/places/london.jpg',
+  content_type: 'image/jpeg'
+}

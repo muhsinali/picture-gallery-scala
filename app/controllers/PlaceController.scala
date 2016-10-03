@@ -1,9 +1,10 @@
 package controllers
 
+import java.nio.file.{Files, Paths}
 import javax.inject.Inject
 
 import models.Place
-import play.api.libs.json.{Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
@@ -23,10 +24,10 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
-  def create(id: Int, name: String, country: String) = Action.async {
+  def create(id: Int, name: String, country: String, pictureURL: String) = Action.async {
     for {
       places <- placesFuture
-      lastError <- places.insert(Place(id, name, country))
+      lastError <- places.insert(Place(id, name, country, Files.readAllBytes(Paths.get(pictureURL))))
     } yield
       Ok(s"lastError: $lastError\n")
   }
@@ -56,5 +57,13 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     }
 
     placesList.map { places => Ok(Json.toJson(places))}
+  }
+
+  // TODO make the query such that it only finds 1 Place. Then return the picture on that.
+  def retrievePictureOfPlace(id: Int) = Action.async {
+    val placesList: Future[List[Place]] = placesFuture.flatMap {
+      _.find(Json.obj("id" -> id)).cursor[Place](ReadPreference.primary).collect[List]()
+    }
+    placesList.map { places => Ok(places.head.picture)}
   }
 }
