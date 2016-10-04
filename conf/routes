@@ -8,7 +8,7 @@ GET     /list                       controllers.Application.showList
 GET     /grid                       controllers.Application.showGrid
 
 
-POST     /places/add                controllers.PlaceController.create(id: Int, name: String, country: String, pictureURL: String)
+POST     /places/add                controllers.PlaceController.create(id: Int, name: String, country: String, description: String, pictureURL: String)
 GET      /places                    controllers.PlaceController.findByName(name: String)
 
 # Used to retrieve images of a place
