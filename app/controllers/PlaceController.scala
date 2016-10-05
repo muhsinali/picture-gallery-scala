@@ -4,7 +4,7 @@ import java.nio.file.{Files, Paths}
 import javax.inject.Inject
 
 import models.Place
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, Controller}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
@@ -45,19 +45,18 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     placesList
   }
 
-  def findByName(name: String) = Action.async {
-    // let's do our query
-    val placesList: Future[List[Place]] = placesFuture.flatMap {
-      // find all Places with name `name`
-      _.find(Json.obj("name" -> name)).
-        // perform the query and get a cursor of JsObject
+
+  def findBy(jsObject: JsObject) = Action.async {
+    val placesList: Future[List[Place]] = placesFuture.flatMap{
+      _.find(jsObject).
         cursor[Place](ReadPreference.primary).
-        // Collect the results as a list
         collect[List]()
     }
-
     placesList.map { places => Ok(Json.toJson(places))}
   }
+
+  def findById(id: Int) = findBy(Json.obj("id" -> id))
+
 
   // TODO make the query such that it only finds 1 Place. Then return the picture on that.
   def retrievePictureOfPlace(id: Int) = Action.async {

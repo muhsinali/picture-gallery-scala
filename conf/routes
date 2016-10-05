@@ -6,10 +6,10 @@
 GET     /                           controllers.Application.index
 GET     /list                       controllers.Application.showList
 GET     /grid                       controllers.Application.showGrid
-
+GET     /show-place/:id             controllers.Application.showPlace(id: Int)
+GET     /place-form                 controllers.Application.displayPlaceForm()
 
 POST     /places/add                controllers.PlaceController.create(id: Int, name: String, country: String, description: String, pictureURL: String)
-GET      /places                    controllers.PlaceController.findByName(name: String)
 
 # Used to retrieve images of a place
 GET      /picture/:id               controllers.PlaceController.retrievePictureOfPlace(id: Int)

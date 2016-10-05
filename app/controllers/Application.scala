@@ -7,6 +7,7 @@ import play.api.mvc.{Action, Controller}
 import models.Place
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.twirl.api.Html
+import play.modules.reactivemongo.json._
 
 import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
@@ -33,5 +34,18 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
   }
 
   def showGrid() = TODO
+
+  // TODO this is blocking, find out how to make it non-blocking
+  def showPlace(id: Int) = Action { implicit request =>
+    val placeOpt: Option[Place] = Await.result(placeController.placesFuture.flatMap(_.find(Json.obj("id" -> id)).one[Place]), 1 seconds)
+    if(placeOpt.isDefined){
+      Ok(views.html.showPlace(placeOpt.get))
+    } else {
+      BadRequest("Uh oh")
+    }
+  }
+
+  def displayPlaceForm() = TODO
+
 }
 

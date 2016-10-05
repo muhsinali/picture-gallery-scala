@@ -11,6 +11,7 @@
         <th>Location</th>
         <th>Country</th>
         <th>Picture</th>
+        <th>Edit</th>
     </tr>
     </thead>
     <tbody>
@@ -20,6 +21,7 @@
         <td>@currentPlace.name</td>
         <td>@currentPlace.country</td>
         <td><img style="height: 50px" src="@routes.PlaceController.retrievePictureOfPlace(currentPlace.id)"/> </td>
+        <td><a class="glyphicon glyphicon-pencil" href="@routes.Application.showPlace(currentPlace.id)"></a></td>
     </tr>
     }
     </tbody>
