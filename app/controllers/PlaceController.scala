@@ -20,19 +20,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * Created by Muhsin Ali on 01/10/2016.
   */
 
-//
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
-
-  // TODO put this into a PlaceController companion object
-  val placeForm = Form(
-    mapping(
-      "name" -> nonEmptyText,
-      "country" -> nonEmptyText,
-      "description" -> nonEmptyText,
-      "picture" -> nonEmptyText
-    )(PlaceData.apply)(PlaceData.unapply)
-  )
 
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
@@ -45,13 +34,9 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   }
 
   def retrieveAllPlaces(): Future[List[Place]] = {
-    // let's do our query
     val placesList: Future[List[Place]] = placesFuture.flatMap {
-      // find all Places with name `name`
       _.find(Json.obj()).
-        // perform the query and get a cursor of JsObject
         cursor[Place](ReadPreference.primary).
-        // Collect the results as a list
         collect[List]()
     }
     placesList
@@ -77,4 +62,14 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     }
     placesList.map { places => Ok(places.head.picture)}
   }
+}
+
+object PlaceController {
+  val createPlaceForm = Form(
+    mapping(
+      "name" -> nonEmptyText,
+      "country" -> nonEmptyText,
+      "description" -> nonEmptyText
+    )(PlaceData.apply)(PlaceData.unapply)
+  )
 }
