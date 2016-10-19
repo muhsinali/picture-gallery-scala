@@ -2,13 +2,14 @@ package controllers
 
 import javax.inject.Inject
 
+import com.google.common.io.Files
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import models.Place
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
@@ -46,15 +47,23 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
     })
   }
 
-  def upload = Action(parse.multipartFormData) { implicit request =>
+  def upload = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
       formWithErrors => {
         println(formWithErrors.errorsAsJson)
-        BadRequest(views.html.placeForm(formWithErrors))
+        Future(BadRequest(views.html.placeForm(formWithErrors)))
       },
       placeData => {
-        Ok("this worked for some reason!")
+        placeController.placesFuture.flatMap(places => {
+          request.body.file("picture").map { picture =>
+            places.insert(Place(0, placeData.name, placeData.country, placeData.description, Files.toByteArray(picture.ref.file)))
+            Future(Redirect(routes.Application.index()).flashing("success" -> s"Added place ${placeData.name}"))
+          }.getOrElse {
+            println("Something went wrong...")
+            Future(Redirect(routes.Application.index()).flashing("error" -> "Could not upload place. Please correct the form below."))
+          }
+        })
       }
     )
   }
