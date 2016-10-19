@@ -3,14 +3,12 @@ package controllers
 import javax.inject.Inject
 
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller, Result}
-import models.{Place, PlaceData}
-import play.api.data.Form
+import play.api.mvc.{Action, Controller}
+import models.Place
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
 
-import scala.concurrent.{Await, ExecutionContext}
-import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
@@ -37,7 +35,7 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
       Ok(views.html.grid(placesList, numRows, numColumns))
     })
   }
-  
+
   def showPlace(id: Int) = Action.async { implicit request =>
     placeController.placesFuture.flatMap(_.find(Json.obj("id" -> id)).one[Place]).map(placeOpt => {
       if(placeOpt.isDefined){
