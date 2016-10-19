@@ -1,0 +1,39 @@
+@(placeForm: Form[PlaceData])(implicit messages: Messages, flash: Flash)
+@import helper._
+
+
+@main("Edit form"){
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/placeForm.css")">
+}{
+
+<div id="place-details">
+    <div id="left-div" class="pull-left">
+        @form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
+        <fieldset>
+            <legend>Add a place</legend>
+            <input type="hidden" value="@placeForm("id").value.getOrElse("")" name="id"/>
+            @inputText(placeForm("name"), '_label -> "Name", 'placeholder -> "London")
+            @inputText(placeForm("country"), '_label -> "Country", 'placeholder -> "United Kingdom")
+            @textarea(placeForm("description"), '_label -> "Description", 'placeholder -> "Type a description here")
+            @inputFile(placeForm("pictureURL"), '_label -> "Picture")
+        </fieldset>
+        <div class="pull-right">
+            <input type="submit" class="btn btn-success" value="Save place">
+            @if(!placeForm("id").value.getOrElse("").isEmpty()){
+            <a href="/place/@placeForm("id").value" class="btn btn-default">Cancel</a>
+            } else {
+            <a href="@routes.Application.showGrid()" class="btn btn-default">Cancel</a>
+            }
+        </div>
+        }
+    </div>
+
+    @if(!placeForm("picture").value.getOrElse("").isEmpty()){
+    <div id="right-div" class="pull-right">
+        <h4>Current picture</h4>
+        <img src="/picture/@placeForm("id").value" />
+    </div>
+    }
+</div>
+
+}

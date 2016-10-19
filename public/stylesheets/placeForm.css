@@ -1,0 +1,56 @@
+#place-details {
+    min-height: 500px;
+    height: auto;
+    padding-bottom: 50px;
+    margin-bottom: 50px;
+}
+
+#left-div {
+    height: auto;
+    max-width: 40%;
+    width: 40%;
+    min-width: 400px;
+    margin-bottom: 25px;
+}
+
+#right-div {
+    height: auto;
+    width: 55%;
+    min-width: 300px;
+    margin-bottom: 25px;
+}
+
+/* Specifies the spacing of the text in the left div */
+h4 { margin: 10px 0px 5px; }
+p { margin-bottom: 30px; }
+
+/* Adds extra spacing between the picture and its title  */
+#right-column h4 { margin-bottom: 10px; }
+
+img {
+    width: 100%;
+    min-width: 200px;
+    float: right;
+}
+
+textarea {
+    height: 130px;
+    width: 100%;
+    font-size: 15px;
+}
+
+
+legend {
+    font-family: Georgia;
+    font-size: 20px;
+}
+
+label {
+    font-family: "Helvetica Neue", Arial;
+    font-size: 16px;
+}
+
+input {
+    font-family: Arial;
+    font-size: 15px;
+}

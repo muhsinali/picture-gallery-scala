@@ -1,0 +1,20 @@
+@(places: List[Place], numRows: Int, numColumns: Int)(implicit flash: Flash)
+
+
+@main("Grid view"){
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/grid.css")">
+}{
+@for(r <- 0 until numRows){
+<div class="row">
+    @for(c <- 0 until numColumns){
+        @if(numColumns * r + c < places.length){
+            <div class="col-md-4">
+                <a class="thumbnail" href="@routes.Application.showPlace(places(numColumns * r + c).id)">
+                    <img src="@routes.PlaceController.retrievePictureOfPlace(places(numColumns * r + c).id)">
+                </a>
+            </div>
+        }
+    }
+</div>
+}
+}

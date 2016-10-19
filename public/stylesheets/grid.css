@@ -1,0 +1,9 @@
+/* Override value in main.css */
+.view-buttons {
+    margin-bottom: 40px;
+}
+
+.row {
+    clear: both;
+    margin-bottom: 20px;
+}

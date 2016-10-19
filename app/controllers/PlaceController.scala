@@ -3,7 +3,9 @@ package controllers
 import java.nio.file.{Files, Paths}
 import javax.inject.Inject
 
-import models.Place
+import models._
+import play.api.data._
+import play.api.data.Forms._
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, Controller}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
@@ -21,6 +23,16 @@ import scala.concurrent.{ExecutionContext, Future}
 //
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
+
+  // TODO put this into a PlaceController companion object
+  val placeForm = Form(
+    mapping(
+      "name" -> nonEmptyText,
+      "country" -> nonEmptyText,
+      "description" -> nonEmptyText,
+      "picture" -> nonEmptyText
+    )(PlaceData.apply)(PlaceData.unapply)
+  )
 
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
