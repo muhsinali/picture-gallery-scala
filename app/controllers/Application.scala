@@ -14,6 +14,8 @@ import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
 
+// TODO add flashing where appropriate
+
 /**
   * Created by Muhsin Ali on 29/09/2016.
   */
@@ -42,11 +44,13 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
       if(placeOpt.isDefined){
         Ok(views.html.showPlace(placeOpt.get))
       } else {
+        // TODO improve this
         BadRequest("Uh oh")
       }
     })
   }
 
+  // TODO Flashing not showing up. Fix this.
   def upload = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
@@ -57,10 +61,10 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
       placeData => {
         placeController.placesFuture.flatMap(places => {
           request.body.file("picture").map { picture =>
+            // TODO change id field here
             places.insert(Place(0, placeData.name, placeData.country, placeData.description, Files.toByteArray(picture.ref.file)))
             Future(Redirect(routes.Application.index()).flashing("success" -> s"Added place ${placeData.name}"))
           }.getOrElse {
-            println("Something went wrong...")
             Future(Redirect(routes.Application.index()).flashing("error" -> "Could not upload place. Please correct the form below."))
           }
         })
