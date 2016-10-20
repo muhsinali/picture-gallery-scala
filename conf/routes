@@ -5,10 +5,9 @@
 # An example controller showing a sample home page
 GET     /                           controllers.Application.index
 GET     /list                       controllers.Application.showList
-GET     /grid                       controllers.Application.showGrid
 GET     /show-place/:id             controllers.Application.showPlace(id: Int)
 
-GET     /add-place                  controllers.Application.displayPlaceForm()
+GET     /add-place                  controllers.Application.showPlaceForm()
 POST    /add-place                  controllers.Application.upload()
 
 GET     /picture/:id                controllers.PlaceController.retrievePictureOfPlace(id: Int)

@@ -13,13 +13,13 @@
     @head
 </head>
 <body class="container">
-    @if(flash.get("success").nonEmpty){
+    @if(flash.get("success").isDefined){
         <div class="alert alert-success">
             @flash.get("success")
         </div>
     }
 
-    @if(flash.get("error").nonEmpty){
+    @if(flash.get("error").isDefined){
         <div class="alert alert-danger">
             @flash.get("error")
         </div>
@@ -28,12 +28,11 @@
 
     <h1>Picture gallery</h1>
     <div class="view-buttons pull-right">
-        <!--TODO fix broken link -->
         <a class="btn btn-primary btn-lrg" href="@routes.Application.upload()">Add place</a>
-        <a class="btn btn-default btn-lrg" href="@routes.Application.showGrid()">
+        <a class="btn btn-default btn-lrg" href="@routes.Application.index">
             <span class="glyphicon glyphicon-th"></span>
         </a>
-        <a class="btn btn-default btn-lrg" href="@routes.Application.showList()">
+        <a class="btn btn-default btn-lrg" href="@routes.Application.showList">
             <span class="glyphicon glyphicon-th-list"></span>
         </a>
     </div>
