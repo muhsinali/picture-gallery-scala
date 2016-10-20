@@ -12,5 +12,9 @@ POST    /add-place                  controllers.Application.upload()
 
 GET     /picture/:id                controllers.Application.retrievePictureOfPlace(id: Int)
 
+GET     /edit-place/:id             controllers.Application.editPlace(id: Int)
+
+DELETE  /delete/:id                 controllers.Application.deletePlace(id: Int)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

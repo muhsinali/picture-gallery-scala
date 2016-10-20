@@ -4,18 +4,6 @@
 @main("Show Place"){
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/showPlace.css")">
 }{
-<script>
-        function del(urlToDelete) {
-            $.ajax({
-                url: urlToDelete,
-                type: 'DELETE',
-                success: function(results) {
-                    location = '/';
-                }
-            });
-        }
-    </script>
-
 <div id="place-details">
     <div id="left-div" class="pull-left">
         <h4>Name</h4>
@@ -26,6 +14,11 @@
 
         <h4>Description</h4>
         <p>@place.description</p>
+
+        <div class="pull-right">
+            <a class="btn btn-default" href="@routes.Application.editPlace(place.id)">Edit</a>
+            <a class="btn btn-danger" onclick="javascript:del('@routes.Application.deletePlace(place.id)')">Delete</a>
+        </div>
     </div>
 
 

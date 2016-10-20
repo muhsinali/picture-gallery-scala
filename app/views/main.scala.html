@@ -13,6 +13,18 @@
     @head
 </head>
 <body class="container">
+    <script>
+        function del(urlToDelete) {
+            $.ajax({
+                url: urlToDelete,
+                type: 'DELETE',
+                success: function(results) {
+                    location = '/';
+                }
+            });
+        }
+    </script>
+
     @if(flash.get("success").isDefined){
         <div class="alert alert-success">
             @flash.get("success")

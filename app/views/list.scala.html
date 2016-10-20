@@ -12,6 +12,7 @@
         <th>Country</th>
         <th>Picture</th>
         <th>Edit</th>
+        <th>Delete</th>
     </tr>
     </thead>
     <tbody>
@@ -22,6 +23,7 @@
         <td>@currentPlace.country</td>
         <td><img style="height: 50px" src="@routes.Application.retrievePictureOfPlace(currentPlace.id)"/> </td>
         <td><a class="glyphicon glyphicon-pencil" href="@routes.Application.showPlace(currentPlace.id)"></a></td>
+        <td><a class="glyphicon glyphicon-trash" onclick="javascript:del('@routes.Application.deletePlace(currentPlace.id)')"></a></td>
     </tr>
     }
     </tbody>

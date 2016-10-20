@@ -22,6 +22,23 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   implicit val formatter = Json.format[Place]
   val placeController = new PlaceController(reactiveMongoApi)
 
+  // TODO get the flash scope to work
+  def deletePlace(id: Int) = Action.async { implicit request =>
+    for{
+      // TODO move to PlaceController
+      placeToDelete <- placeController.findById(id)
+      places <- placeController.placesFuture
+    }yield{
+      if(placeToDelete.isDefined) {
+        places.remove[Place](placeToDelete.get, firstMatchOnly = true)
+        Redirect(routes.Application.index()).flashing("success" -> s"Deleted place with ID $id")
+      } else {
+        Redirect(routes.Application.index()).flashing("error" -> s"Could not delete place with ID $id")
+      }
+    }
+  }
+
+  def editPlace(id: Int) = TODO
 
   def index() = Action.async { implicit request =>
     placeController.retrieveAllPlaces.map(placesList => {
