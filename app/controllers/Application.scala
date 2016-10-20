@@ -3,10 +3,9 @@ package controllers
 import javax.inject.Inject
 
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller, Flash}
+import play.api.mvc.{Action, Controller}
 import models.Place
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
-import play.modules.reactivemongo.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Play.current
@@ -25,34 +24,43 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
   val placeController = new PlaceController(reactiveMongoApi)
 
 
-  def index = Action.async { implicit request =>
-    placeController.retrieveAllPlaces().map(placesList => {
+  def index() = Action.async { implicit request =>
+    placeController.retrieveAllPlaces.map(placesList => {
       val numColumns = 3
       val numRows = math.ceil(placesList.length / numColumns.toDouble).toInt
       Ok(views.html.grid(placesList, numRows, numColumns))
     })
   }
 
+  def retrievePictureOfPlace(id: Int) = Action.async {
+    placeController.findById(id).map(placeOpt => {
+      if(placeOpt.isDefined){
+        Ok(placeOpt.get.picture)
+      } else {
+        BadRequest(s"Could not find picture for Place with ID $id")
+      }
+    })
+  }
+
   def showList = Action.async { implicit request =>
-    placeController.retrieveAllPlaces().map(placesList => Ok(views.html.list(placesList)))
+    placeController.retrieveAllPlaces.map(placesList => Ok(views.html.list(placesList)))
   }
 
   def showPlace(id: Int) = Action.async { implicit request =>
-    for {
-      // TODO move into PlaceController
-      places <- placeController.placesFuture
-      placeOpt <- places.find(Json.obj("id" -> id)).one[Place]
-    } yield {
+    placeController.findOne(Json.obj("id" -> id)).map(placeOpt => {
       if (placeOpt.isDefined) {
-        Ok (views.html.showPlace (placeOpt.get))
+        Ok (views.html.showPlace(placeOpt.get))
       } else {
         Redirect(routes.Application.index()).flashing("error" -> s"Cannot find place with id $id")
       }
-    }
+    })
   }
 
+  def showPlaceForm = Action { implicit request =>
+    Ok(views.html.placeForm(PlaceController.createPlaceForm))
+  }
 
-  // TODO find out how to make the picture required
+  // TODO find out how to make the picture a required field
   def upload() = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
@@ -71,10 +79,5 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
       }
     )
   }
-
-  def showPlaceForm = Action { implicit request =>
-    Ok(views.html.placeForm(PlaceController.createPlaceForm))
-  }
-
 }
 

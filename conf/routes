@@ -10,7 +10,7 @@ GET     /show-place/:id             controllers.Application.showPlace(id: Int)
 GET     /add-place                  controllers.Application.showPlaceForm()
 POST    /add-place                  controllers.Application.upload()
 
-GET     /picture/:id                controllers.PlaceController.retrievePictureOfPlace(id: Int)
+GET     /picture/:id                controllers.Application.retrievePictureOfPlace(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -9,7 +9,7 @@ import play.api.data.Forms._
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
 import reactivemongo.api.ReadPreference
@@ -26,51 +26,33 @@ import scala.concurrent.{ExecutionContext, Future}
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
 
-  def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
-
-//  // TODO improve this
-
   def create(placeData: PlaceData, picture: FilePart[TemporaryFile]): Future[WriteResult] = {
     for {
       places <- placesFuture
       numPlaces <- places.count()
-      writeResult <- places.insert(Place(numPlaces, placeData.name, placeData.country, placeData.description, Files.toByteArray(picture.ref.file)))
+      writeResult <- places.insert(Place(numPlaces, placeData.name, placeData.country, placeData.description,
+        Files.toByteArray(picture.ref.file)))
     } yield {
       writeResult
     }
   }
 
-  def retrieveAllPlaces(): Future[List[Place]] = {
-    val placesList: Future[List[Place]] = placesFuture.flatMap {
-      _.find(Json.obj()).
-        cursor[Place](ReadPreference.primary).
-        collect[List]()
-    }
-    placesList
-  }
+  def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
-
-  // TODO split into findMany and findOne for search functionality that you may want to add in the future.
-  // TODO then use findOne() in Application.showPlace()
-  def findBy(jsObject: JsObject) = Action.async {
-    val placesList: Future[List[Place]] = placesFuture.flatMap{
+  def findMany(jsObject: JsObject): Future[List[Place]] = {
+    placesFuture.flatMap{
       _.find(jsObject).
         cursor[Place](ReadPreference.primary).
         collect[List]()
     }
-    placesList.map { places => Ok(Json.toJson(places))}
   }
 
-  def findById(id: Int) = findBy(Json.obj("id" -> id))
+  def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap{_.find(jsObject).one[Place](ReadPreference.primary)}
 
 
-  // TODO make the query such that it only finds 1 Place. Then return the picture on that.
-  def retrievePictureOfPlace(id: Int) = Action.async {
-    val placesList: Future[List[Place]] = placesFuture.flatMap {
-      _.find(Json.obj("id" -> id)).cursor[Place](ReadPreference.primary).collect[List]()
-    }
-    placesList.map { places => Ok(places.head.picture)}
-  }
+  def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
+
+  def retrieveAllPlaces: Future[List[Place]] = findMany(Json.obj())
 }
 
 object PlaceController {
