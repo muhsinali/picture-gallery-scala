@@ -10,7 +10,7 @@ GET     /show-place/:id             controllers.Application.showPlace(id: Int)
 GET     /add-using-form             controllers.Application.displayPlaceForm()
 
 POST    /add-using-form             controllers.Application.upload()
-POST    /places/add                 controllers.PlaceController.create(id: Int, name: String, country: String, description: String, pictureURL: String)
+#POST    /places/add                 controllers.PlaceController.create(id: Int, name: String, country: String, description: String, pictureURL: String)
 
 # Used to retrieve images of a place
 GET      /picture/:id               controllers.PlaceController.retrievePictureOfPlace(id: Int)

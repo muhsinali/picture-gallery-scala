@@ -14,7 +14,9 @@ import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
 
+// TODO fix upload method
 // TODO add flashing where appropriate
+// TODO implement edit and delete functionality
 
 /**
   * Created by Muhsin Ali on 29/09/2016.
@@ -40,34 +42,39 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
   }
 
   def showPlace(id: Int) = Action.async { implicit request =>
-    placeController.placesFuture.flatMap(_.find(Json.obj("id" -> id)).one[Place]).map(placeOpt => {
-      if(placeOpt.isDefined){
-        Ok(views.html.showPlace(placeOpt.get))
+    for {
+      // TODO move into PlaceController
+      places <- placeController.placesFuture
+      placeOpt <- places.find(Json.obj("id" -> id)).one[Place]
+    } yield {
+      if (placeOpt.isDefined) {
+        Ok (views.html.showPlace (placeOpt.get))
       } else {
-        // TODO improve this
-        BadRequest("Uh oh")
+        Redirect(routes.Application.index()).flashing("error" -> s"Cannot find place with id $id")
       }
-    })
+    }
   }
 
-  // TODO Flashing not showing up. Fix this.
+  // TODO flash scope not showing up
   def upload = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
       formWithErrors => {
+        // TODO improve this
         println(formWithErrors.errorsAsJson)
         Future(BadRequest(views.html.placeForm(formWithErrors)))
       },
       placeData => {
-        placeController.placesFuture.flatMap(places => {
-          request.body.file("picture").map { picture =>
-            // TODO change id field here
-            places.insert(Place(0, placeData.name, placeData.country, placeData.description, Files.toByteArray(picture.ref.file)))
-            Future(Redirect(routes.Application.index()).flashing("success" -> s"Added place ${placeData.name}"))
-          }.getOrElse {
-            Future(Redirect(routes.Application.index()).flashing("error" -> "Could not upload place. Please correct the form below."))
-          }
-        })
+        // TODO Move into PlaceController.create() and use that instead.
+        for {
+          places <- placeController.placesFuture
+          picture <- Future(request.body.file("picture").get)
+        } yield {
+          // TODO change id field here
+          // TODO use writeResult and return error if couldn't be saved to database
+          places.insert(Place(0, placeData.name, placeData.country, placeData.description, Files.toByteArray(picture.ref.file)))
+          Redirect(routes.Application.index())
+        }
       }
     )
   }

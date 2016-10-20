@@ -25,7 +25,8 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
-  def create(id: Int, name: String, country: String, description: String, pictureURL: String) = Action.async {
+  // TODO improve this
+  def create(id: Int, name: String, country: String, description: String, picture: Array[Byte]) = Action.async {
     for {
       places <- placesFuture
       writeResult <- places.insert(Place(id, name, country, description, Files.readAllBytes(Paths.get(pictureURL))))
