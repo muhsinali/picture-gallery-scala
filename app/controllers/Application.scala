@@ -5,11 +5,10 @@ import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import models.Place
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
 
 
 // TODO implement edit and delete functionality
@@ -17,8 +16,8 @@ import play.api.i18n.Messages.Implicits._
 /**
   * Created by Muhsin Ali on 29/09/2016.
   */
-class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
-  with MongoController with ReactiveMongoComponents {
+class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext)
+  extends Controller with MongoController with ReactiveMongoComponents with I18nSupport {
 
   implicit val formatter = Json.format[Place]
   val placeController = new PlaceController(reactiveMongoApi)
@@ -61,6 +60,7 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
   }
 
   // TODO find out how to make the picture a required field
+  // Handles the form post, inserting the new Place into the MongoDB database
   def upload() = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
