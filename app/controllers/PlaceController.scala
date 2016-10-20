@@ -25,14 +25,14 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
-  // TODO improve this
-  def create(id: Int, name: String, country: String, description: String, picture: Array[Byte]) = Action.async {
-    for {
-      places <- placesFuture
-      writeResult <- places.insert(Place(id, name, country, description, Files.readAllBytes(Paths.get(pictureURL))))
-    } yield
-      Ok(s"writeResult: $writeResult\n")
-  }
+//  // TODO improve this
+//  def create(id: Int, name: String, country: String, description: String, picture: Array[Byte]) = Action.async {
+//    for {
+//      places <- placesFuture
+//      writeResult <- places.insert(Place(id, name, country, description, Files.readAllBytes(Paths.get(pictureURL))))
+//    } yield
+//      Ok(s"writeResult: $writeResult\n")
+//  }
 
   def retrieveAllPlaces(): Future[List[Place]] = {
     val placesList: Future[List[Place]] = placesFuture.flatMap {
