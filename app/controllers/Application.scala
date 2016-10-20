@@ -2,7 +2,6 @@ package controllers
 
 import javax.inject.Inject
 
-import com.google.common.io.Files
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import models.Place
@@ -12,6 +11,8 @@ import play.modules.reactivemongo.json._
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+
+import scala.util.{Success, Failure}
 
 
 // TODO fix upload method
@@ -55,26 +56,25 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
     }
   }
 
-  // TODO flash scope not showing up
+
   def upload = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
       formWithErrors => {
-        // TODO improve this
-        println(formWithErrors.errorsAsJson)
+        // TODO improve this - add flash scope
         Future(BadRequest(views.html.placeForm(formWithErrors)))
       },
       placeData => {
-        // TODO Move into PlaceController.create() and use that instead.
-        for {
-          places <- placeController.placesFuture
-          picture <- Future(request.body.file("picture").get)
-        } yield {
-          // TODO change id field here
-          // TODO use writeResult and return error if couldn't be saved to database
-          places.insert(Place(0, placeData.name, placeData.country, placeData.description, Files.toByteArray(picture.ref.file)))
-          Redirect(routes.Application.index())
-        }
+        // TODO use writeResult and return error if couldn't be saved to database
+        val writeResult = placeController.create(placeData, request.body.file("picture").get)
+        writeResult.map(w => {
+          // TODO flash scope not showing up
+          if(!w.hasErrors){
+            Redirect(routes.Application.index()).flashing("success" -> "Successfully added Place")
+          } else {
+            Redirect(routes.Application.index()).flashing("error" -> "Could not add Place to database")
+          }
+        })
       }
     )
   }

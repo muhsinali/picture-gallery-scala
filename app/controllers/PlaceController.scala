@@ -1,16 +1,19 @@
 package controllers
 
-import java.nio.file.{Files, Paths}
+import com.google.common.io.Files
 import javax.inject.Inject
 
 import models._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{Action, Controller}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
 import reactivemongo.api.ReadPreference
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,13 +29,16 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
 //  // TODO improve this
-//  def create(id: Int, name: String, country: String, description: String, picture: Array[Byte]) = Action.async {
-//    for {
-//      places <- placesFuture
-//      writeResult <- places.insert(Place(id, name, country, description, Files.readAllBytes(Paths.get(pictureURL))))
-//    } yield
-//      Ok(s"writeResult: $writeResult\n")
-//  }
+
+  def create(placeData: PlaceData, picture: FilePart[TemporaryFile]): Future[WriteResult] = {
+    for {
+      places <- placesFuture
+      numPlaces <- places.count()
+      writeResult <- places.insert(Place(numPlaces, placeData.name, placeData.country, placeData.description, Files.toByteArray(picture.ref.file)))
+    } yield {
+      writeResult
+    }
+  }
 
   def retrieveAllPlaces(): Future[List[Place]] = {
     val placesList: Future[List[Place]] = placesFuture.flatMap {
