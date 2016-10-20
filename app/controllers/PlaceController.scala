@@ -50,6 +50,8 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   }
 
 
+  // TODO split into findMany and findOne for search functionality that you may want to add in the future.
+  // TODO then use findOne() in Application.showPlace()
   def findBy(jsObject: JsObject) = Action.async {
     val placesList: Future[List[Place]] = placesFuture.flatMap{
       _.find(jsObject).

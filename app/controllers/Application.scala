@@ -65,7 +65,6 @@ class Application @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec:
         Future(BadRequest(views.html.placeForm(formWithErrors)))
       },
       placeData => {
-        // TODO use writeResult and return error if couldn't be saved to database
         val writeResult = placeController.create(placeData, request.body.file("picture").get)
         writeResult.map(w => {
           // TODO flash scope not showing up
