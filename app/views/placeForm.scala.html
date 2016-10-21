@@ -21,21 +21,21 @@
             <input type="submit" class="btn btn-success" value="Save place">
             @if(!placeForm("id").value.getOrElse("").isEmpty()){
             <!-- TODO replace with reverse route -->
-            <a href="/place/@placeForm("id").value" class="btn btn-default">Cancel</a>
+                <a href="/place/@placeForm("id").value" class="btn btn-default">Cancel</a>
             } else {
-            <a href="@routes.Application.showGridView()" class="btn btn-default">Cancel</a>
+                <a href="@routes.Application.showGridView()" class="btn btn-default">Cancel</a>
             }
         </div>
         }
     </div>
 
     @if(!placeForm("picture").value.getOrElse("").isEmpty()){
-    <div id="right-div" class="pull-right">
-        <h4>Current picture</h4>
-        <!-- TODO replace with reverse route -->
-        <img src="/picture/placeForm("id").value" />
-        <!--<img src="@routes.Application.retrievePictureOfPlace(placeForm("id").value.get.toInt)" />-->
-    </div>
+        <div id="right-div" class="pull-right">
+            <h4>Current picture</h4>
+            <!-- TODO replace with reverse route -->
+            <img src="/picture/placeForm("id").value" />
+            <!--<img src="@routes.Application.retrievePictureOfPlace(placeForm("id").value.get.toInt)" />-->
+        </div>
     }
 </div>
 

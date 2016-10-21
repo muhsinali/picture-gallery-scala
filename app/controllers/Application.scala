@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
-import models.Place
+import models.{Place, PlaceData}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 
@@ -33,7 +33,18 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def editPlace(id: Int) = TODO
+  // TODO find out how to fill the picture field. It is not part of the PlaceData class.
+  def editPlace(id: Int) = Action.async { implicit request =>
+    placeController.findById(id).map(placeOpt => {
+      if(placeOpt.isDefined){
+        val placeFound = placeOpt.get
+        val placeData = PlaceData(placeFound.name, placeFound.country, placeFound.description)
+        Ok(views.html.placeForm(PlaceController.createPlaceForm.fill(placeData)))
+      } else {
+        Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with $id to edit")
+      }
+    })
+  }
 
   def showGridView() = Action.async { implicit request =>
     placeController.retrieveAllPlaces.map(placesList => {
