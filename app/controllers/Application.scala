@@ -24,23 +24,18 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
   // TODO get the flash scope to work
   def deletePlace(id: Int) = Action.async { implicit request =>
-    for{
-      // TODO move to PlaceController
-      placeToDelete <- placeController.findById(id)
-      places <- placeController.placesFuture
-    }yield{
-      if(placeToDelete.isDefined) {
-        places.remove[Place](placeToDelete.get, firstMatchOnly = true)
-        Redirect(routes.Application.index()).flashing("success" -> s"Deleted place with ID $id")
+    placeController.remove(id).map(wasPlaceRemoved => {
+      if(wasPlaceRemoved){
+        Redirect(routes.Application.showGridView()).flashing("success" -> s"Deleted place with ID $id")
       } else {
-        Redirect(routes.Application.index()).flashing("error" -> s"Could not delete place with ID $id")
+        Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not delete place with ID $id")
       }
-    }
+    })
   }
 
   def editPlace(id: Int) = TODO
 
-  def index() = Action.async { implicit request =>
+  def showGridView() = Action.async { implicit request =>
     placeController.retrieveAllPlaces.map(placesList => {
       val numColumns = 3
       val numRows = math.ceil(placesList.length / numColumns.toDouble).toInt
@@ -58,7 +53,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def showList = Action.async { implicit request =>
+  def showListView = Action.async { implicit request =>
     placeController.retrieveAllPlaces.map(placesList => Ok(views.html.list(placesList)))
   }
 
@@ -67,7 +62,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       if (placeOpt.isDefined) {
         Ok (views.html.showPlace(placeOpt.get))
       } else {
-        Redirect(routes.Application.index()).flashing("error" -> s"Cannot find place with id $id")
+        Redirect(routes.Application.showGridView()).flashing("error" -> s"Cannot find place with id $id")
       }
     })
   }
@@ -78,19 +73,19 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
   // TODO find out how to make the picture a required field
   // Handles the form post, inserting the new Place into the MongoDB database
-  def upload() = Action.async(parse.multipartFormData) { implicit request =>
+  def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
       formWithErrors => {
         Future(BadRequest(views.html.placeForm(formWithErrors)))
       },
       placeData => {
-        val writeResult = placeController.create(placeData, request.body.file("picture").get)
-        writeResult.map(w => {
-          if(!w.hasErrors){
-            Redirect(routes.Application.index()).flashing("success" -> "Successfully added Place")
+        val writeResultFuture = placeController.create(placeData, request.body.file("picture").get)
+        writeResultFuture.map(writeResult => {
+          if(!writeResult.hasErrors){
+            Redirect(routes.Application.showGridView()).flashing("success" -> "Successfully added Place")
           } else {
-            Redirect(routes.Application.index()).flashing("error" -> "Could not add Place to database")
+            Redirect(routes.Application.showGridView()).flashing("error" -> "Could not add Place to database")
           }
         })
       }

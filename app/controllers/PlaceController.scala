@@ -49,8 +49,17 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap{_.find(jsObject).one[Place](ReadPreference.primary)}
 
-
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
+
+  def remove(id: Int): Future[Boolean] = {
+    for {
+      placeToDelete <- findById(id)
+      places <- placesFuture
+      writeResult <- places.remove[Place](placeToDelete.get, firstMatchOnly = true)
+    } yield {
+      placeToDelete.isDefined && writeResult.ok
+    }
+  }
 
   def retrieveAllPlaces: Future[List[Place]] = findMany(Json.obj())
 }

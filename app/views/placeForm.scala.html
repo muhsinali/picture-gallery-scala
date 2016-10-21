@@ -8,7 +8,7 @@
 
 <div id="place-details">
     <div id="left-div" class="pull-left">
-        @form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
+        @form(action = routes.Application.uploadPlace(), 'enctype -> "multipart/form-data") {
         <fieldset>
             <legend>Add a place</legend>
             <input type="hidden" value="@placeForm("id").value.getOrElse("")" name="id"/>
@@ -20,9 +20,10 @@
         <div class="pull-right">
             <input type="submit" class="btn btn-success" value="Save place">
             @if(!placeForm("id").value.getOrElse("").isEmpty()){
+            <!-- TODO replace with reverse route -->
             <a href="/place/@placeForm("id").value" class="btn btn-default">Cancel</a>
             } else {
-            <a href="@routes.Application.index" class="btn btn-default">Cancel</a>
+            <a href="@routes.Application.showGridView()" class="btn btn-default">Cancel</a>
             }
         </div>
         }
@@ -31,7 +32,9 @@
     @if(!placeForm("picture").value.getOrElse("").isEmpty()){
     <div id="right-div" class="pull-right">
         <h4>Current picture</h4>
-        <img src="/picture/@placeForm("id").value" />
+        <!-- TODO replace with reverse route -->
+        <img src="/picture/placeForm("id").value" />
+        <!--<img src="@routes.Application.retrievePictureOfPlace(placeForm("id").value.get.toInt)" />-->
     </div>
     }
 </div>

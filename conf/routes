@@ -3,16 +3,16 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.Application.index
-GET     /list                       controllers.Application.showList
-GET     /show-place/:id             controllers.Application.showPlace(id: Int)
+GET     /                           controllers.Application.showGridView
+GET     /list                       controllers.Application.showListView
+GET     /show/:id                   controllers.Application.showPlace(id: Int)
 
-GET     /add-place                  controllers.Application.showPlaceForm()
-POST    /add-place                  controllers.Application.upload()
+GET     /add                        controllers.Application.showPlaceForm()
+POST    /add                        controllers.Application.uploadPlace()
 
 GET     /picture/:id                controllers.Application.retrievePictureOfPlace(id: Int)
 
-GET     /edit-place/:id             controllers.Application.editPlace(id: Int)
+GET     /edit/:id                   controllers.Application.editPlace(id: Int)
 
 DELETE  /delete/:id                 controllers.Application.deletePlace(id: Int)
 
