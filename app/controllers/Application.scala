@@ -11,8 +11,6 @@ import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMo
 import scala.concurrent.{ExecutionContext, Future}
 
 
-// TODO implement edit and delete functionality
-
 /**
   * Created by Muhsin Ali on 29/09/2016.
   */
@@ -41,7 +39,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
         val placeData = PlaceData(placeFound.name, placeFound.country, placeFound.description)
         Ok(views.html.placeForm(PlaceController.createPlaceForm.fill(placeData)))
       } else {
-        Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with $id to edit")
+        Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with $id")
       }
     })
   }
