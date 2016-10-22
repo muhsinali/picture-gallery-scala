@@ -1,24 +1,66 @@
 package controllers
 
+import java.io.File
 import javax.inject.Inject
 
-import play.api.libs.json.Json
+import com.google.common.io.Files
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Controller}
 import models.{Place, PlaceData}
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.inject.ApplicationLifecycle
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.io.Source
 
 
 /**
   * Created by Muhsin Ali on 29/09/2016.
   */
-class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext)
+class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, applicationLifecycle: ApplicationLifecycle)
+                           (implicit ec: ExecutionContext)
   extends Controller with MongoController with ReactiveMongoComponents with I18nSupport {
 
   implicit val formatter = Json.format[Place]
   val placeController = new PlaceController(reactiveMongoApi)
+
+  applicationLifecycle.addStopHook { () =>
+    onShutdown()
+  }
+
+  onStartup()
+
+  def onStartup() = {
+    def getListOfFiles(dirpath: String) = {
+      // Get a list of all the files in a directory
+      val dir = new File(dirpath)
+      if(dir.exists() && dir.isDirectory){
+        dir.listFiles.filter(f => f.isFile && f.toString.endsWith(".json")).toList
+      } else {
+        List[File]()
+      }
+    }
+    val jsonFiles = getListOfFiles("./public/jsonFiles")
+
+    for(f <- jsonFiles) {
+      val parsedJson: JsValue = Json.parse(Source.fromFile(f).mkString)
+
+      // TODO might be handy to use parsedJson.as[PlaceData] here
+      val id = (parsedJson \ "_id").get.toString().replace("\"", "")
+      val name = (parsedJson \ "name").get.toString().replace("\"", "")
+      val country = (parsedJson \ "country").get.toString().replace("\"", "")
+      val description = (parsedJson \ "description").get.toString().replace("\"", "")
+      val pictureURL = (parsedJson \ "picture").get.toString().replace("\"", "")
+      placeController.placesFuture.map(_.insert(Place(id.toInt, name, country, description, Files.toByteArray(new File(pictureURL)))))
+    }
+  }
+
+  def onShutdown() = {
+    placeController.placesFuture.map(_.drop(failIfNotFound = true))
+  }
+
+
 
   // TODO get the flash scope to work
   def deletePlace(id: Int) = Action.async { implicit request =>
