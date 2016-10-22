@@ -98,7 +98,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def retrievePictureOfPlace(id: Int) = Action.async {
+  def getPictureOfPlace(id: Int) = Action.async {
     placeController.findById(id).map(placeOpt => {
       if(placeOpt.isDefined){
         Ok(placeOpt.get.picture)
@@ -109,7 +109,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   }
 
   def showGridView() = Action.async { implicit request =>
-    placeController.retrieveAllPlaces.map(placesList => {
+    placeController.getAllPlaces.map(placesList => {
       val numColumns = 3
       val numRows = math.ceil(placesList.length / numColumns.toDouble).toInt
       Ok(views.html.grid(placesList, numRows, numColumns))
@@ -117,7 +117,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   }
 
   def showListView = Action.async { implicit request =>
-    placeController.retrieveAllPlaces.map(placesList => Ok(views.html.list(placesList)))
+    placeController.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))
   }
 
   def showPlace(id: Int) = Action.async { implicit request =>

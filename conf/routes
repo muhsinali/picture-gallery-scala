@@ -10,7 +10,7 @@ GET     /show/:id                   controllers.Application.showPlace(id: Int)
 GET     /add                        controllers.Application.showPlaceForm()
 POST    /add                        controllers.Application.uploadPlace()
 
-GET     /picture/:id                controllers.Application.retrievePictureOfPlace(id: Int)
+GET     /picture/:id                controllers.Application.getPictureOfPlace(id: Int)
 
 GET     /edit/:id                   controllers.Application.editPlace(id: Int)
 
