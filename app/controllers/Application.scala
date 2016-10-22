@@ -41,8 +41,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     */
   def onStartup() = {
     // Get a list of all the files in a directory
-    def getListOfFiles(dirpath: String) = {
-      val dir = new File(dirpath)
+    def getListOfFiles(dirPath: String) = {
+      val dir = new File(dirPath)
       if(dir.exists() && dir.isDirectory){
         dir.listFiles.filter(f => f.isFile && f.toString.endsWith(".json")).toList
       } else {
@@ -50,15 +50,17 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       }
     }
 
+    def getJsonProperty(jsValue: JsValue, field: String) = (jsValue \ field).get.toString().replace("\"", "")
+
     val jsonFiles = getListOfFiles("./public/jsonFiles")
     for(f <- jsonFiles) {
-      // TODO might be handy to use parsedJson.as[PlaceData] here
+      // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
       val parsedJson: JsValue = Json.parse(Source.fromFile(f).mkString)
-      val id = (parsedJson \ "_id").get.toString().replace("\"", "")
-      val name = (parsedJson \ "name").get.toString().replace("\"", "")
-      val country = (parsedJson \ "country").get.toString().replace("\"", "")
-      val description = (parsedJson \ "description").get.toString().replace("\"", "")
-      val pictureURL = (parsedJson \ "picture").get.toString().replace("\"", "")
+      val id = getJsonProperty(parsedJson, "_id")
+      val name = getJsonProperty(parsedJson, "name")
+      val country = getJsonProperty(parsedJson, "country")
+      val description = getJsonProperty(parsedJson, "description")
+      val pictureURL = getJsonProperty(parsedJson, "picture")
       placeController.placesFuture.map(_.insert(Place(id.toInt, name, country, description, Files.toByteArray(new File(pictureURL)))))
     }
   }
