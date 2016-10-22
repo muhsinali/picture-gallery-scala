@@ -18,6 +18,13 @@ import scala.io.Source
 /**
   * Created by Muhsin Ali on 29/09/2016.
   */
+
+/**
+  * This web application stores places of interest in a database and displays them either using a list or a grid layout.
+  * The user can add, edit or delete places from the database.
+  *
+  * Application is the entry point of this web application, and handles all HTTP requests for this web application.
+  */
 class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, applicationLifecycle: ApplicationLifecycle)
                            (implicit ec: ExecutionContext)
   extends Controller with MongoController with ReactiveMongoComponents with I18nSupport {
@@ -25,15 +32,16 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   implicit val formatter = Json.format[Place]
   val placeController = new PlaceController(reactiveMongoApi)
 
-  applicationLifecycle.addStopHook { () =>
-    onShutdown()
-  }
-
   onStartup()
+  applicationLifecycle.addStopHook {() => onShutdown()}
 
+
+  /**
+    * Populates database with Places at application startup
+    */
   def onStartup() = {
+    // Get a list of all the files in a directory
     def getListOfFiles(dirpath: String) = {
-      // Get a list of all the files in a directory
       val dir = new File(dirpath)
       if(dir.exists() && dir.isDirectory){
         dir.listFiles.filter(f => f.isFile && f.toString.endsWith(".json")).toList
@@ -41,12 +49,11 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
         List[File]()
       }
     }
+
     val jsonFiles = getListOfFiles("./public/jsonFiles")
-
     for(f <- jsonFiles) {
-      val parsedJson: JsValue = Json.parse(Source.fromFile(f).mkString)
-
       // TODO might be handy to use parsedJson.as[PlaceData] here
+      val parsedJson: JsValue = Json.parse(Source.fromFile(f).mkString)
       val id = (parsedJson \ "_id").get.toString().replace("\"", "")
       val name = (parsedJson \ "name").get.toString().replace("\"", "")
       val country = (parsedJson \ "country").get.toString().replace("\"", "")
@@ -56,6 +63,9 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     }
   }
 
+  /**
+    * Clears database at application shutdown
+    */
   def onShutdown() = {
     placeController.placesFuture.map(_.drop(failIfNotFound = true))
   }
@@ -73,7 +83,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  // TODO find out how to fill the picture field. It is not part of the PlaceData class.
+  // TODO find out how to fill the picture field with the picture's filename. It is not part of the PlaceData class.
   def editPlace(id: Int) = Action.async { implicit request =>
     placeController.findById(id).map(placeOpt => {
       if(placeOpt.isDefined){
@@ -86,14 +96,6 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def showGridView() = Action.async { implicit request =>
-    placeController.retrieveAllPlaces.map(placesList => {
-      val numColumns = 3
-      val numRows = math.ceil(placesList.length / numColumns.toDouble).toInt
-      Ok(views.html.grid(placesList, numRows, numColumns))
-    })
-  }
-
   def retrievePictureOfPlace(id: Int) = Action.async {
     placeController.findById(id).map(placeOpt => {
       if(placeOpt.isDefined){
@@ -101,6 +103,14 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       } else {
         BadRequest(s"Could not find picture for Place with ID $id")
       }
+    })
+  }
+
+  def showGridView() = Action.async { implicit request =>
+    placeController.retrieveAllPlaces.map(placesList => {
+      val numColumns = 3
+      val numRows = math.ceil(placesList.length / numColumns.toDouble).toInt
+      Ok(views.html.grid(placesList, numRows, numColumns))
     })
   }
 
@@ -123,7 +133,9 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   }
 
   // TODO find out how to make the picture a required field
-  // Handles the form post, inserting the new Place into the MongoDB database
+  /**
+    * Handles the form post, inserting the new Place into the database
+    */
   def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
     boundForm.fold(
