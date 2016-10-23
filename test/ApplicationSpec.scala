@@ -7,7 +7,7 @@ import play.api.test.Helpers._
  * You can mock out a whole application including requests, plugins etc.
  * For more information, consult the wiki.
  */
-class ApplicationSpec extends PlaySpec with OneAppPerTest {
+class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
   "Routes" should {
 
@@ -17,26 +17,51 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
   }
 
-  "HomeController" should {
+  "Application" should {
+    // Application.showGridView tests
+    "render the grid view" in {
+      val gridView = route(app, FakeRequest(GET, "/")).get
 
-    "render the index page" in {
-      val home = route(app, FakeRequest(GET, "/")).get
+      status(gridView) mustBe OK
+      contentAsString(gridView) must include ("Grid view")
+    }
 
-      status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Your new application is ready.")
+    // Application.showListView tests
+    "render the list view" in {
+      val listView = route(app, FakeRequest(GET, "/list")).get
+      status(listView) mustBe OK
+      contentAsString(listView) must include ("List view")
+    }
+
+    // Application.showPlace() tests
+    "show London place" in {
+      val london = route(app, FakeRequest(GET, "/show/1")).get
+      status(london) mustBe OK
+      contentAsString(london) must include ("London")
+    }
+
+    "fail on non-existent place" in {
+      val nonExistentPlace = route(app, FakeRequest(GET, "/show/9999")).get
+      status(nonExistentPlace) mustBe SEE_OTHER
+    }
+
+    // Application.showPlaceForm() tests
+    "render the Place form" in {
+      val placeForm = route(app, FakeRequest(GET, "/add")).get
+      status(placeForm) mustBe OK
+    }
+
+    // Application.getPictureOfPlace() tests
+    "get picture of London" in {
+      val pictureOfLondon = route(app, FakeRequest(GET, "/picture/1")).get
+      status(pictureOfLondon) mustBe OK
+    }
+    "fail on non-existent picture" in {
+      val pictureOfNonExistentPlace = route(app, FakeRequest(GET, "/picture/9999")).get
+      status(pictureOfNonExistentPlace) mustBe BAD_REQUEST
     }
 
   }
 
-  "CountController" should {
-
-    "return an increasing count" in {
-      contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "0"
-      contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "1"
-      contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "2"
-    }
-
-  }
 
 }
