@@ -55,13 +55,15 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     val jsonFiles = getListOfFiles("./public/jsonFiles")
     for(f <- jsonFiles) {
       // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
-      val parsedJson: JsValue = Json.parse(Source.fromFile(f).mkString)
+      val source = Source.fromFile(f)
+      val parsedJson: JsValue = Json.parse(source.mkString)
       val id = getJsonProperty(parsedJson, "_id")
       val name = getJsonProperty(parsedJson, "name")
       val country = getJsonProperty(parsedJson, "country")
       val description = getJsonProperty(parsedJson, "description")
       val pictureURL = getJsonProperty(parsedJson, "picture")
       placeController.placesFuture.map(_.insert(Place(id.toInt, name, country, description, Files.toByteArray(new File(pictureURL)))))
+      source.close()
     }
   }
 
