@@ -66,7 +66,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
 
     // TODO add a mock place, and edit it and then delete it.
-//    // Doesn't work - TODO figure out how to add a mock place
+//    // TODO figure out how to add a mock place
 //    "add a mock place" in {
 //      val placeData: Map[String, Seq[String]] = Map(
 //        "id" -> Seq("0"),

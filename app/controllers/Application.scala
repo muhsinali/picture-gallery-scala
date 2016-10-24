@@ -149,7 +149,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       placeData => {
         val writeResultFuture = placeController.create(placeData, request.body.file("picture").get)
         writeResultFuture.map(writeResult => {
-          if(!writeResult.hasErrors){
+          if(writeResult.ok){
             Redirect(routes.Application.showGridView()).flashing("success" -> "Successfully added Place")
           } else {
             Redirect(routes.Application.showGridView()).flashing("error" -> "Could not add Place to database")
