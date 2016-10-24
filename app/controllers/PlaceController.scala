@@ -56,7 +56,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   }
 
 
-  def findById(id: BSONObjectID): Future[Option[Place]] = findOne(Json.obj("id" -> id))
+  def findById(id: BSONObjectID): Future[Option[Place]] = findOne(Json.obj("_id" -> id))
 
   def findMany(jsObject: JsObject): Future[List[Place]] = {
     placesFuture.flatMap{
