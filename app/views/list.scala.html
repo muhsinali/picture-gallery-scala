@@ -7,7 +7,6 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th>ID</th>
         <th>Location</th>
         <th>Country</th>
         <th>Picture</th>
@@ -18,7 +17,6 @@
     <tbody>
     @for(currentPlace <- places){
     <tr>
-        <td>@currentPlace.id</td>
         <td><a href="@routes.Application.showPlace(currentPlace.id)">@currentPlace.name</a></td>
         <td><a href="@routes.Application.showPlace(currentPlace.id)">@currentPlace.country</a></td>
         <td><a href="@routes.Application.showPlace(currentPlace.id)"><img style="height: 50px" src="@routes.Application.getPictureOfPlace(currentPlace.id)"/></a></td>
