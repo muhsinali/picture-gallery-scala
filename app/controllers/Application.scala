@@ -3,16 +3,18 @@ package controllers
 import java.io.File
 import javax.inject.Inject
 
-import com.google.common.io.Files
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Controller}
 import models.{Place, PlaceData}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.ApplicationLifecycle
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
+import reactivemongo.bson.BSONObjectID
+import reactivemongo.play.json.BSONObjectIDFormat   // implicit format for BSONObjectID
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
+import scala.util.{Failure, Success}
 
 
 /**
@@ -57,13 +59,17 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
       val source = Source.fromFile(f)
       val parsedJson: JsValue = Json.parse(source.mkString)
-      val id = getJsonProperty(parsedJson, "_id")
+      val id = BSONObjectID.parse(getJsonProperty(parsedJson, "_id"))
       val name = getJsonProperty(parsedJson, "name")
       val country = getJsonProperty(parsedJson, "country")
       val description = getJsonProperty(parsedJson, "description")
-      val pictureURL = getJsonProperty(parsedJson, "picture")
-      placeController.placesFuture.map(_.insert(Place(id.toInt, name, country, description, Files.toByteArray(new File(pictureURL)))))
+      val picture = new File(getJsonProperty(parsedJson, "picture"))
       source.close()
+
+      id match {
+        case Success(v) => placeController.create(v, name, country, description, picture)
+        case Failure(e) => throw e
+      }
     }
   }
 
@@ -71,13 +77,13 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     * Clears database at application shutdown
     */
   def onShutdown() = {
-    placeController.placesFuture.map(_.drop(failIfNotFound = true))
+    placeController.drop()
   }
 
 
 
   // TODO get the flash scope to work
-  def deletePlace(id: Int) = Action.async { implicit request =>
+  def deletePlace(id: BSONObjectID) = Action.async { implicit request =>
     placeController.remove(id).map(wasPlaceRemoved => {
       if(wasPlaceRemoved){
         Redirect(routes.Application.showGridView()).flashing("success" -> s"Deleted place with ID $id")
@@ -88,7 +94,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   }
 
   // TODO find out how to fill the picture field with the picture's filename. It is not part of the PlaceData class.
-  def editPlace(id: Int) = Action.async { implicit request =>
+  def editPlace(id: BSONObjectID) = Action.async { implicit request =>
     placeController.findById(id).map(placeOpt => {
       if(placeOpt.isDefined){
         val placeFound = placeOpt.get
@@ -100,7 +106,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def getPictureOfPlace(id: Int) = Action.async {
+  def getPictureOfPlace(id: BSONObjectID) = Action.async {
     placeController.findById(id).map(placeOpt => {
       if(placeOpt.isDefined){
         Ok(placeOpt.get.picture)
@@ -122,8 +128,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     placeController.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))
   }
 
-  def showPlace(id: Int) = Action.async { implicit request =>
-    placeController.findOne(Json.obj("id" -> id)).map(placeOpt => {
+  def showPlace(id: BSONObjectID) = Action.async { implicit request =>
+    placeController.findById(id).map(placeOpt => {
       if (placeOpt.isDefined) {
         Ok (views.html.showPlace(placeOpt.get))
       } else {

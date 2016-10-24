@@ -1,5 +1,7 @@
 package controllers
 
+import java.io.File
+
 import com.google.common.io.Files
 import javax.inject.Inject
 
@@ -14,6 +16,7 @@ import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMo
 import play.modules.reactivemongo.json._
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
+import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,15 +35,28 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def create(placeData: PlaceData, picture: FilePart[TemporaryFile]): Future[WriteResult] = {
     for {
       places <- placesFuture
-      numPlaces <- places.count()
-      writeResult <- places.insert(Place(numPlaces, placeData.name, placeData.country, placeData.description,
+      writeResult <- places.insert(Place(BSONObjectID.generate(), placeData.name, placeData.country, placeData.description,
         Files.toByteArray(picture.ref.file)))
     } yield {
       writeResult
     }
   }
 
-  def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
+  def create(id: BSONObjectID, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
+    for {
+      places <- placesFuture
+      writeResult <- places.insert(Place(id, name, country, description, Files.toByteArray(picture)))
+    } yield {
+      writeResult
+    }
+  }
+
+  def drop() = {
+    placesFuture.map(_.drop(failIfNotFound = true))
+  }
+
+
+  def findById(id: BSONObjectID): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
   def findMany(jsObject: JsObject): Future[List[Place]] = {
     placesFuture.flatMap{
@@ -56,7 +72,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
-  def remove(id: Int): Future[Boolean] = {
+  def remove(id: BSONObjectID): Future[Boolean] = {
     for {
       placeToDelete <- findById(id)
       places <- placesFuture

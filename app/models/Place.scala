@@ -1,6 +1,8 @@
 package models
 
 import play.api.libs.json.Json
+import reactivemongo.bson.BSONObjectID
+import reactivemongo.play.json.BSONObjectIDFormat   // implicit format for BSONObjectID
 
 /**
   * Created by Muhsin Ali on 29/09/2016.
@@ -14,8 +16,8 @@ case class PlaceData(name: String, country: String, description: String)
 /**
   * Place - a point of interest that the user would like to store in the gallery.
   */
-case class Place (id: Int, name: String, country: String, description: String, picture: Array[Byte]) {
-  override def toString: String = Integer.toString(id)
+case class Place (id: BSONObjectID, name: String, country: String, description: String, picture: Array[Byte]) {
+  override def toString: String = id.toString
 }
 
 object Place {

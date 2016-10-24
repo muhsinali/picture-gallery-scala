@@ -5,16 +5,16 @@
 # An example controller showing a sample home page
 GET     /                           controllers.Application.showGridView
 GET     /list                       controllers.Application.showListView
-GET     /show/:id                   controllers.Application.showPlace(id: Int)
+GET     /show/:id                   controllers.Application.showPlace(id: BSONObjectID)
 
 GET     /add                        controllers.Application.showPlaceForm()
 POST    /add                        controllers.Application.uploadPlace()
 
-GET     /picture/:id                controllers.Application.getPictureOfPlace(id: Int)
+GET     /picture/:id                controllers.Application.getPictureOfPlace(id: BSONObjectID)
 
-GET     /edit/:id                   controllers.Application.editPlace(id: Int)
+GET     /edit/:id                   controllers.Application.editPlace(id: BSONObjectID)
 
-DELETE  /delete/:id                 controllers.Application.deletePlace(id: Int)
+DELETE  /delete/:id                 controllers.Application.deletePlace(id: BSONObjectID)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
