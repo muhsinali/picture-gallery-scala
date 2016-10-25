@@ -1,5 +1,6 @@
 @(placeForm: Form[PlaceData])(implicit flash: Flash, messages: Messages)
 @import helper._
+@import controllers.PlaceController
 
 
 @main("Edit form"){
@@ -20,8 +21,10 @@
         <div class="pull-right">
             <input type="submit" class="btn btn-success" value="Save place">
             @if(!placeForm("id").value.getOrElse("").isEmpty()){
-            <!-- TODO broken link (picture field not present in form); also replace with reverse route -->
-                <a href="/place/@placeForm("id").value" class="btn btn-default">Cancel</a>
+
+            <!-- TODO broken link (id field not present in form); also replace with reverse route -->
+            <!-- TODO find out how to insert the id field into the place form -->
+                <a href="/show/@placeForm("id").value" class="btn btn-default">Cancel</a>
             } else {
                 <a href="@routes.Application.showGridView()" class="btn btn-default">Cancel</a>
             }
@@ -32,7 +35,7 @@
     @if(!placeForm("picture").value.getOrElse("").isEmpty()){
         <div id="right-div" class="pull-right">
             <h4>Current picture</h4>
-            <!-- TODO broken link (picture field not present in form); also replace with reverse route -->
+            <!-- TODO broken link (id field not present in form); also replace with reverse route -->
             <img src="/picture/placeForm("id").value" />
         </div>
     }

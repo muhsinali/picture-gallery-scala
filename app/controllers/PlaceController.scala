@@ -27,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 
 /**
-  * PlaceController - acts as a DAO to Place objects stored in the MongoDB database.
+  * PlaceController - acts as a DAO to Place objects stored in the database.
   */
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {

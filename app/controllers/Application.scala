@@ -39,7 +39,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
 
   /**
-    * Populates database with Places at application startup
+    * Populates database with Places at application startup.
     */
   def onStartup() = {
     // Get a list of all the files in a directory
@@ -74,7 +74,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   }
 
   /**
-    * Clears database at application shutdown
+    * Clears database at application shutdown.
     */
   def onShutdown() = {
     placeController.drop()
@@ -93,6 +93,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
+  // TODO fix this - probably need to check in Application.uploadPlace if the Place already exists. If so, update it, otherwise create it.
   // TODO find out how to fill the picture field with the picture's filename. It is not part of the PlaceData class.
   def editPlace(id: BSONObjectID) = Action.async { implicit request =>
     placeController.findById(id).map(placeOpt => {
@@ -133,6 +134,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       if (placeOpt.isDefined) {
         Ok (views.html.showPlace(placeOpt.get))
       } else {
+        // TODO get flash scope to work
         Redirect(routes.Application.showGridView()).flashing("error" -> s"Cannot find place with id $id")
       }
     })
@@ -144,7 +146,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
   // TODO find out how to make the picture a required field
   /**
-    * Handles the form post, inserting the new Place into the database
+    * Handles the form post, inserting the newly created Place into the database.
     */
   def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
