@@ -23,10 +23,9 @@
 
 
     @if(place.picture != null){
-    <div id="right-div" class="pull-right">
-        <h4>Current picture</h4>
-        <img src="@routes.Application.getPictureOfPlace(place.id)" />
-    </div>
+        <div id="right-div" class="pull-right">
+            <img src="@routes.Application.getPictureOfPlace(place.id)" />
+        </div>
     }
 </div>
 }

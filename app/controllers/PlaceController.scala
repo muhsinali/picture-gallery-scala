@@ -15,7 +15,7 @@ import play.api.mvc.Controller
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
 import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -35,14 +35,14 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def create(placeData: PlaceData, picture: FilePart[TemporaryFile]): Future[WriteResult] = {
     for {
       places <- placesFuture
-      writeResult <- places.insert(Place(BSONObjectID.generate(), placeData.name, placeData.country, placeData.description,
+      writeResult <- places.insert(Place(PlaceController.generateID, placeData.name, placeData.country, placeData.description,
         Files.toByteArray(picture.ref.file)))
     } yield {
       writeResult
     }
   }
 
-  def create(id: BSONObjectID, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
+  def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
     for {
       places <- placesFuture
       writeResult <- places.insert(Place(id, name, country, description, Files.toByteArray(picture)))
@@ -56,7 +56,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   }
 
 
-  def findById(id: BSONObjectID): Future[Option[Place]] = findOne(Json.obj("_id" -> id))
+  def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
   def findMany(jsObject: JsObject): Future[List[Place]] = {
     placesFuture.flatMap{
@@ -72,7 +72,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
-  def remove(id: BSONObjectID): Future[Boolean] = {
+  def remove(id: Int): Future[Boolean] = {
     for {
       placeToDelete <- findById(id)
       places <- placesFuture
@@ -81,14 +81,36 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
       placeToDelete.isDefined && writeResult.ok
     }
   }
+
+  def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
+    val id = placeData.id.get
+    for {
+      places <- placesFuture
+      placeOpt <- findById(id)
+      picture = if(pictureOpt.get.filename != "") Files.toByteArray(pictureOpt.get.ref.file) else placeOpt.get.picture
+      updateWriteResult <- places.update(Json.obj("id" -> id), Place(id, placeData.name, placeData.country, placeData.description, picture))
+    } yield {
+      updateWriteResult
+    }
+  }
 }
+
+
 
 object PlaceController {
   val createPlaceForm = Form(
     mapping(
+      "id" -> optional(number),
       "name" -> nonEmptyText,
       "country" -> nonEmptyText,
       "description" -> nonEmptyText
     )(PlaceData.apply)(PlaceData.unapply)
   )
+
+  private var placeID: Int = 0
+
+  def generateID: Int = {
+    placeID += 1
+    placeID
+  }
 }

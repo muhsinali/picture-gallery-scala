@@ -3,7 +3,7 @@
 @import controllers.PlaceController
 
 
-@main("Edit form"){
+@main("Add/Edit form"){
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/placeForm.css")">
 }{
 
@@ -11,7 +11,7 @@
     <div id="left-div" class="pull-left">
         @form(action = routes.Application.uploadPlace(), 'enctype -> "multipart/form-data") {
         <fieldset>
-            <legend>Add a place</legend>
+            <legend>Add/edit a place</legend>
             <input type="hidden" value="@placeForm("id").value.getOrElse("")" name="id"/>
             @inputText(placeForm("name"), '_label -> "Name", 'placeholder -> "London")
             @inputText(placeForm("country"), '_label -> "Country", 'placeholder -> "United Kingdom")
@@ -21,10 +21,7 @@
         <div class="pull-right">
             <input type="submit" class="btn btn-success" value="Save place">
             @if(!placeForm("id").value.getOrElse("").isEmpty()){
-
-            <!-- TODO broken link (id field not present in form); also replace with reverse route -->
-            <!-- TODO find out how to insert the id field into the place form -->
-                <a href="/show/@placeForm("id").value" class="btn btn-default">Cancel</a>
+                <a href="@routes.Application.showPlace(placeForm("id").value.get.toInt)" class="btn btn-default">Cancel</a>
             } else {
                 <a href="@routes.Application.showGridView()" class="btn btn-default">Cancel</a>
             }
@@ -32,13 +29,12 @@
         }
     </div>
 
-    @if(!placeForm("picture").value.getOrElse("").isEmpty()){
-        <div id="right-div" class="pull-right">
-            <h4>Current picture</h4>
-            <!-- TODO broken link (id field not present in form); also replace with reverse route -->
-            <img src="/picture/placeForm("id").value" />
-        </div>
-    }
+        @if(placeForm("id").value.isDefined){
+            <div id="right-div" class="pull-right">
+                <h4>Current picture</h4>
+                <img src="@routes.Application.getPictureOfPlace(placeForm("id").value.get.toInt)" />
+            </div>
+        }
 </div>
 
 }
