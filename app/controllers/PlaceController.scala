@@ -109,6 +109,10 @@ object PlaceController {
 
   private var placeID: Int = 0
 
+  /* TODO could use something like java.util.UUID.randomUUID.toString for a unique ID, but then the URL will include it
+      in various route definitions, making it unreadable.
+      So, not sure what would be the best way to make URLs human readable whilst guaranteeing that they bind to unique Place objects.
+   */
   def generateID: Int = {
     placeID += 1
     placeID
