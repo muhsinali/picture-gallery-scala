@@ -51,19 +51,13 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     }
   }
 
-  def drop() = {
-    placesFuture.map(_.drop(failIfNotFound = true))
-  }
+  def drop() = placesFuture.map(_.drop(failIfNotFound = true))
 
 
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
   def findMany(jsObject: JsObject): Future[List[Place]] = {
-    placesFuture.flatMap{
-      _.find(jsObject).
-        cursor[Place](ReadPreference.primary).
-        collect[List]()
-    }
+    placesFuture.flatMap{_.find(jsObject).cursor[Place](ReadPreference.primary).collect[List]()}
   }
 
   def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap{_.find(jsObject).one[Place](ReadPreference.primary)}
@@ -98,6 +92,16 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
 
 object PlaceController {
+  /* TODO could use something like java.util.UUID.randomUUID.toString for a unique ID, but then the URL will include it
+      in various route definitions, making it unreadable.
+      So, not sure what would be the best way to make URLs human readable whilst guaranteeing that they bind to unique Place objects.
+   */
+  private var placeID: Int = 0
+  def generateID: Int = {
+    placeID += 1
+    placeID
+  }
+
   val createPlaceForm = Form(
     mapping(
       "id" -> optional(number),
@@ -106,15 +110,4 @@ object PlaceController {
       "description" -> nonEmptyText
     )(PlaceData.apply)(PlaceData.unapply)
   )
-
-  private var placeID: Int = 0
-
-  /* TODO could use something like java.util.UUID.randomUUID.toString for a unique ID, but then the URL will include it
-      in various route definitions, making it unreadable.
-      So, not sure what would be the best way to make URLs human readable whilst guaranteeing that they bind to unique Place objects.
-   */
-  def generateID: Int = {
-    placeID += 1
-    placeID
-  }
 }

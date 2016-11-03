@@ -13,11 +13,10 @@ import reactivemongo.play.json.BSONObjectIDFormat   // implicit formatter for BS
   */
 case class PlaceData(id: Option[Int], name: String, country: String, description: String)
 
+
+
 /**
   * Place - a point of interest that the user would like to store in the gallery.
-  *
-  * _id is defined as a field in the primary constructor so that the ObjectID is stored under the "_id" field in the database.
-  * However for readability purposes, _id is not to be accessed outside this class. Please use the id field instead.
   */
 case class Place (id: Int, name: String, country: String, description: String, picture: Array[Byte]) {
   override def toString: String = id.toString

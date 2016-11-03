@@ -55,9 +55,9 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
     def getJsonProperty(jsValue: JsValue, field: String) = (jsValue \ field).get.toString().replace("\"", "")
 
+    // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
     val jsonFiles = getListOfFiles("./public/jsonFiles")
     for(f <- jsonFiles) {
-      // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
       val source = Source.fromFile(f)
       val parsedJson: JsValue = Json.parse(source.mkString)
       val id = PlaceController.generateID
@@ -142,7 +142,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
   // TODO find out how to make the picture a required field for a newly created Place
   /**
-    * Handles the form post, inserting the newly created Place into the database.
+    * Handles the form post. It either inserts a Place into the database or edits an existing Place depending on whether
+    * the Place already has a UID (only existing Places have a UID).
     */
   def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()

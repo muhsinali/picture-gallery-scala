@@ -3,7 +3,7 @@
 @import controllers.PlaceController
 
 
-@main("Add/Edit form"){
+@main("Add/edit form"){
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/placeForm.css")">
 }{
 
@@ -18,9 +18,10 @@
             @textarea(placeForm("description"), '_label -> "Description", 'placeholder -> "Type a description here")
             @inputFile(placeForm("picture"), '_label -> "Picture")
         </fieldset>
+
         <div class="pull-right">
             <input type="submit" class="btn btn-success" value="Save place">
-            @if(!placeForm("id").value.getOrElse("").isEmpty()){
+            @if(placeForm("id").value.isDefined){
                 <a href="@routes.Application.showPlace(placeForm("id").value.get.toInt)" class="btn btn-default">Cancel</a>
             } else {
                 <a href="@routes.Application.showGridView()" class="btn btn-default">Cancel</a>
