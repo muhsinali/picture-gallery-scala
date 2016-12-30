@@ -3,19 +3,16 @@ package controllers
 import java.io.File
 import javax.inject.Inject
 
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, Controller}
 import models.{Place, PlaceData}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.ApplicationLifecycle
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, Controller}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
-import reactivemongo.bson.BSONObjectID
-import reactivemongo.play.json.BSONObjectIDFormat
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
-import scala.util.{Failure, Success}
 
 
 /**
@@ -23,9 +20,6 @@ import scala.util.{Failure, Success}
   */
 
 /**
-  * This web application stores places of interest in a database and displays them either using a list or a grid layout.
-  * The user can add, edit or delete places from the database.
-  *
   * Application is the entry point of this web application, and handles all HTTP requests for this web application.
   */
 class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, applicationLifecycle: ApplicationLifecycle)

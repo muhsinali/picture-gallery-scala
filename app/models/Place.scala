@@ -1,8 +1,6 @@
 package models
 
-import play.api.libs.json.Json
-import reactivemongo.bson.BSONObjectID
-import reactivemongo.play.json.BSONObjectIDFormat   // implicit formatter for BSONObjectID
+import play.api.libs.json.Json   // implicit formatter for BSONObjectID
 
 /**
   * Created by Muhsin Ali on 29/09/2016.

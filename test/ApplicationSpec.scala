@@ -1,13 +1,6 @@
-import java.io.File
-
-import com.google.common.io.Files
-import models.Place
 import org.scalatestplus.play._
-import play.api.libs.Files.TemporaryFile
-import play.api.mvc.MultipartFormData
-import play.api.mvc.MultipartFormData.{DataPart, FilePart}
-import play.api.test._
 import play.api.test.Helpers._
+import play.api.test._
 
 /**
  * Add your spec here.
@@ -18,7 +11,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
   "Routes" should {
     "send 404 on a bad request" in  {
-      route(app, FakeRequest(GET, "/boum")).map(status(_)) mustBe Some(NOT_FOUND)
+      route(app, FakeRequest(GET, "/fake-request")).map(status) mustBe Some(NOT_FOUND)
     }
   }
 
@@ -39,7 +32,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
     // Application.showPlace() tests
     "show London place" in {
-      val london = route(app, FakeRequest(GET, "/show/1")).get
+      val london = route(app, FakeRequest(GET, "/show/3")).get
       status(london) mustBe OK
       contentAsString(london) must include ("London")
     }
@@ -56,7 +49,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
     // Application.getPictureOfPlace() tests
     "get picture of London" in {
-      val pictureOfLondon = route(app, FakeRequest(GET, "/picture/1")).get
+      val pictureOfLondon = route(app, FakeRequest(GET, "/picture/3")).get
       status(pictureOfLondon) mustBe OK
     }
     "fail on non-existent picture" in {
@@ -88,13 +81,13 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
     // Application.editPlace() tests
     "edit London place" in {
-      val editLondon = route(app, FakeRequest(GET, "/edit/1")).get
+      val editLondon = route(app, FakeRequest(GET, "/edit/3")).get
       status(editLondon) mustBe OK
     }
 
     // Application.deletePlace() tests
     "delete London place" in {
-      val deleteLondon = route(app, FakeRequest(DELETE, "/delete/1")).get
+      val deleteLondon = route(app, FakeRequest(DELETE, "/delete/3")).get
       status(deleteLondon) mustBe SEE_OTHER
       // TODO find out why deleteLondon is empty
 //      println(contentAsString(deleteLondon))

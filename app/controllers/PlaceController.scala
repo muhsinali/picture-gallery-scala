@@ -1,22 +1,20 @@
 package controllers
 
 import java.io.File
-
-import com.google.common.io.Files
 import javax.inject.Inject
 
+import com.google.common.io.Files
 import models._
-import play.api.data._
 import play.api.data.Forms._
+import play.api.data._
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.Controller
-import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
+import play.api.mvc.MultipartFormData.FilePart
 import play.modules.reactivemongo.json._
+import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
-import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,11 +54,10 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
-  def findMany(jsObject: JsObject): Future[List[Place]] = {
-    placesFuture.flatMap{_.find(jsObject).cursor[Place](ReadPreference.primary).collect[List]()}
-  }
+  def findMany(jsObject: JsObject): Future[List[Place]] = placesFuture.flatMap(_.find(jsObject)
+    .cursor[Place](ReadPreference.primary).collect[List]())
 
-  def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap{_.find(jsObject).one[Place](ReadPreference.primary)}
+  def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap(_.find(jsObject).one[Place](ReadPreference.primary))
 
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
 
@@ -77,7 +74,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   }
 
   def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
-    val id = placeData.id.get
+    val id = placeData.id.get   // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     for {
       places <- placesFuture
       placeOpt <- findById(id)

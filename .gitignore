@@ -1,7 +1,7 @@
 logs
 target
 **/.DS_Store
-/.idea
+**/.idea
 /.idea_modules
 /.classpath
 /.project
