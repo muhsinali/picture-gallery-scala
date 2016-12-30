@@ -1,49 +1,22 @@
-This is your new Play application
+Introduction:
+=================================
+This is a CRUD application that stores places of interest in a database and displays them either using a list or a grid layout back to the user.
+The user can add, edit or delete places from the database.
+
+
+
+
+
+
+Things I don’t know how to do:
 =================================
 
-This file will be packaged with your application when using `activator dist`.
+1. Application appears to be slow at runtime (delete request literally takes 5-10s). It seems that the Play app is waiting to connect to the database. Not sure why, as there’s only ~20mb stored in the database, so processing a request should be in the milliseconds.
 
-There are several demonstration files available in this template.
+2. Would like to merge the PlaceData class into the Place class, but don’t know how to validate whether a user a uploaded a picture (I would like this to be a requirement).
 
-Controllers
-===========
+3. Use Place objects in the routes file instead of Int, but not sure how to uniquely represent a Place object in a URL without using a UUID.
 
-- HomeController.scala:
+4. Would like to improve the tests that I have currently written. Not sure how to include a mock object in a HTTP request to the web app.
 
-  Shows how to handle simple HTTP requests.
-
-- AsyncController.scala:
-
-  Shows how to do asynchronous programming when handling a request.
-
-- CountController.scala:
-
-  Shows how to inject a component into a controller and use the component when
-  handling requests.
-
-Components
-==========
-
-- Module.scala:
-
-  Shows how to use Guice to bind all the components needed by your application.
-
-- Counter.scala:
-
-  An example of a component that contains state, in this case a simple counter.
-
-- ApplicationTimer.scala:
-
-  An example of a component that starts when the application starts and stops
-  when the application stops.
-
-Filters
-=======
-
-- Filters.scala:
-
-  Creates the list of HTTP filters used by your application.
-
-- ExampleFilter.scala
-
-  A simple filter that adds a header to every response.
+5. Getting flash messages to show up on some redirect requests.
