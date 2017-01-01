@@ -68,43 +68,32 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   /**
     * Clears database at application shutdown.
     */
-  def onShutdown() = {
-    placeController.drop()
-  }
+  def onShutdown() = placeController.drop()
 
 
 
   // TODO get the flash scope to work
   def deletePlace(id: Int) = Action.async { implicit request =>
-    placeController.remove(id).map(wasPlaceRemoved => {
-      if(wasPlaceRemoved){
-        Redirect(routes.Application.showGridView()).flashing("success" -> s"Deleted place with ID $id")
-      } else {
-        Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not delete place with ID $id")
-      }
-    })
+    placeController.remove(id).map {
+      case true => Redirect(routes.Application.showGridView()).flashing("success" -> s"Deleted place with ID $id")
+      case false => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not delete place with ID $id")
+    }
   }
 
   def editPlace(id: Int) = Action.async { implicit request =>
-    placeController.findById(id).map(placeOpt => {
-      if(placeOpt.isDefined){
-        val placeFound = placeOpt.get
+    placeController.findById(id).map {
+      case Some(placeFound) =>
         val placeData = PlaceData(Some(id), placeFound.name, placeFound.country, placeFound.description)
         Ok(views.html.placeForm(PlaceController.createPlaceForm.fill(placeData)))
-      } else {
-        Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with $id")
-      }
-    })
+      case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with $id")
+    }
   }
 
   def getPictureOfPlace(id: Int) = Action.async {
-    placeController.findById(id).map(placeOpt => {
-      if(placeOpt.isDefined){
-        Ok(placeOpt.get.picture)
-      } else {
-        BadRequest(s"Could not find picture for place with ID $id")
-      }
-    })
+    placeController.findById(id).map {
+      case Some(place) => Ok(place.picture);
+      case None => BadRequest(s"Could not find picture for place with ID $id")
+    }
   }
 
   def showGridView() = Action.async { implicit request =>
@@ -115,24 +104,19 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def showListView = Action.async { implicit request =>
-    placeController.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))
-  }
+  def showListView = Action.async {implicit request => placeController.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))}
+
 
   // TODO get flash scope to work
   def showPlace(id: Int) = Action.async { implicit request =>
-    placeController.findById(id).map(placeOpt => {
-      if (placeOpt.isDefined) {
-        Ok (views.html.showPlace(placeOpt.get))
-      } else {
-        Redirect(routes.Application.showGridView()).flashing("error" -> s"Cannot find place with id $id")
-      }
-    })
+    placeController.findById(id).map {
+      case Some(place) => Ok(views.html.showPlace(place))
+      case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Cannot find place with id $id")
+    }
   }
 
-  def showPlaceForm = Action { implicit request =>
-    Ok(views.html.placeForm(PlaceController.createPlaceForm))
-  }
+  def showPlaceForm = Action {implicit request => Ok(views.html.placeForm(PlaceController.createPlaceForm))}
+
 
   // TODO find out how to make the picture a required field for a newly created Place
   /**
@@ -146,8 +130,10 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
         Future(BadRequest(views.html.placeForm(formWithErrors)))
       },
       placeData => {
-        val writeResultFuture = if(placeData.id.isDefined) placeController.update(placeData, request.body.file("picture"))
-          else placeController.create(placeData, request.body.file("picture").get)
+        val writeResultFuture = placeData.id match {
+          case Some(id) => placeController.update(placeData, request.body.file("picture"))
+          case None => placeController.create(placeData, request.body.file("picture").get)
+        }
 
         writeResultFuture.map{
           case w: UpdateWriteResult =>
