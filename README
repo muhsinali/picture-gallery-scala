@@ -15,7 +15,7 @@ Things I don’t know how to do:
 
 2. Would like to merge the PlaceData class into the Place class, but don’t know how to validate whether a user a uploaded a picture (I would like this to be a requirement).
 
-3. Use Place objects in the routes file instead of Int, but not sure how to uniquely represent a Place object in a URL without using a UUID.
+3. Use Place objects in the routes file instead of Int, but not sure how to uniquely represent a Place object in a URL without using a UUID (not a good idea to expose the internals of the application in the URL).
 
 4. Would like to improve the tests that I have currently written. Not sure how to include a mock object in a HTTP request to the web app.
 
