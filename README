@@ -11,7 +11,7 @@ The user can add, edit or delete places from the database.
 Things I don’t know how to do:
 =================================
 
-1. Application appears to be slow at runtime (delete request literally takes 5-10s). It seems that the Play app is waiting to connect to the database. Not sure why, as there’s only ~20mb stored in the database, so processing a request should be in the milliseconds.
+1. Application appears to be slow at runtime (delete request literally takes 5-10s when it should be in the milliseconds). It seems that the Play app is waiting to connect to the database. Not sure why, as this issue doesn't occur in the Java implementation of this project.
 
 2. Would like to merge the PlaceData class into the Place class, but don’t know how to validate whether a user a uploaded a picture (I would like this to be a requirement).
 
