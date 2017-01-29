@@ -92,7 +92,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   def getPictureOfPlace(id: Int) = Action.async {
     placeController.findById(id).map {
       case Some(place) => Ok(place.picture);
-      case None => BadRequest(s"Could not find picture for place with ID $id")
+      case None => NotFound(s"Could not find picture for place with ID $id")
     }
   }
 
@@ -132,7 +132,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       placeData => {
         val writeResultFuture = placeData.id match {
           case Some(id) => placeController.update(placeData, request.body.file("picture"))
-          case None => placeController.create(placeData, request.body.file("picture").get)
+          case None => placeController.create(placeData, request.body.file("picture"))
         }
 
         writeResultFuture.map{
@@ -144,7 +144,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
             val flashMessage = if(w.ok) "success" -> "Successfully added place" else "error" -> "Could not add place to database"
             Redirect(routes.Application.showGridView()).flashing(flashMessage)
 
-          case _ => throw new ClassCastException
+          case _ => throw new IllegalArgumentException
         }
       }
     )

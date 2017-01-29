@@ -30,7 +30,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
 
-  def create(placeData: PlaceData, picture: FilePart[TemporaryFile]): Future[WriteResult] = {
+  def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
+    // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
+    val picture = pictureOpt.get
     for {
       places <- placesFuture
       writeResult <- places.insert(Place(PlaceController.generateID, placeData.name, placeData.country, placeData.description,
@@ -89,9 +91,9 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
 
 object PlaceController {
-  /* TODO could use something like java.util.UUID.randomUUID.toString for a unique ID, but then the URL will include it
-      in various route definitions, making it unreadable.
-      So, not sure what would be the best way to make URLs human readable whilst guaranteeing that they bind to unique Place objects.
+  /* NOTE:
+  The method used here to generate IDs is not the best method. Could use a GUID but then this would make the URL harder to read.
+  As a side note, including the ID in the URL is bad practice as it exposes the internals of the application to the user.
    */
   private var placeID: Int = 0
   def generateID: Int = {
