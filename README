@@ -3,7 +3,13 @@ Introduction:
 This is a CRUD application that stores places of interest in a database and displays them either using a list or a grid layout back to the user.
 The user can add, edit or delete places from the database.
 
+There is also a Java implementation of this project.
 
+Tech stack:
+- Scala 2.11.8
+- Play framework (version 2.5.8)
+- MongoDB (ReactiveMongo 0.12)
+- HTML, CSS, Bootstrap 3
 
 
 
