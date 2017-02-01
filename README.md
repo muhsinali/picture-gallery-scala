@@ -1,6 +1,7 @@
 Introduction:
 =================================
 This is a RESTful, CRUD web application that stores places of interest in a database and displays them either using a grid or a list layout back to the user.
+
 The user can add, edit or delete places from the database. It uses the Play framework and the MVC pattern, and is currently configured to run locally on one's machine.
 
 There is also a Java implementation of this project [here](https://github.com/muhsinali/picture-gallery).
@@ -14,7 +15,7 @@ Tech stack:
 
 
 
-Things I don’t know how to do:
+Improvements:
 =================================
 
 1. Application appears to be slow at runtime (delete request literally takes 5-10s when it should be in the milliseconds). It seems that the Play app is waiting to connect to the database. Not sure why; this does not occur in the Java implementation of this web app.
