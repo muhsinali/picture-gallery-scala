@@ -25,7 +25,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 
 /**
-  * PlaceController - acts as a DAO to Place objects stored in the database.
+  * PlaceController - acts as a DAO to instances of the Place class that are stored in the database.
   */
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
@@ -59,6 +59,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def findMany(jsObject: JsObject): Future[List[Place]] = placesFuture.flatMap(_.find(jsObject)
     .cursor[Place](ReadPreference.primary).collect[List]())
 
+  // Might be able to use the OptionT monad transformer from Cats here
   def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap(_.find(jsObject).one[Place](ReadPreference.primary))
 
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
@@ -91,9 +92,18 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
 
 object PlaceController {
-  /* NOTE:
-  The method used here to generate IDs is not the best method. Could use a GUID but then this would make the URL harder to read.
-  As a side note, including the ID in the URL is bad practice as it exposes the internals of the application to the user.
+  /* STOPSHIP
+   NOTE:
+   The method used here to generate IDs is not the best. Could use a GUID (e.g. one generated using the
+   BSONObjectID.generate method) but then this would make the URL harder to read. So for the time being generate a simple
+   ID (would change this method if it were to go into production).
+
+   As a side note, including the ID in the URL is bad practice as it also exposes the internals of the application to the
+   user (which, in this case, would be the ID of a Place stored in the database). This is a security vulnerability.
+
+   As a result, would prefer to use a method that generates a readable, self descriptive URL that's unique to each
+   Place object, for example:
+   https:///www.example.com/this-is-a-self-descriptive-url
    */
   private var placeID: Int = 0
   def generateID: Int = {
