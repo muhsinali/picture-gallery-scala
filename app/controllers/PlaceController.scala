@@ -53,13 +53,13 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def drop() = placesFuture.map(_.drop(failIfNotFound = true))
 
-
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
   def findMany(jsObject: JsObject): Future[List[Place]] = placesFuture.flatMap(_.find(jsObject)
     .cursor[Place](ReadPreference.primary).collect[List]())
 
-  // Might be able to use the OptionT monad transformer from Cats here
+  // Might be able to use the OptionT monad transformer from Cats here - might remove the need to unwrap Options in
+  // some of the methods in this class
   def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap(_.find(jsObject).one[Place](ReadPreference.primary))
 
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
@@ -69,10 +69,11 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def remove(id: Int): Future[Boolean] = {
     for {
       placeToDelete <- findById(id)
+      if placeToDelete.isDefined
       places <- placesFuture
       writeResult <- places.remove[Place](placeToDelete.get, firstMatchOnly = true)
     } yield {
-      placeToDelete.isDefined && writeResult.ok
+      writeResult.ok
     }
   }
 
