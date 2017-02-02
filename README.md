@@ -31,4 +31,4 @@ Improvements:
 
 5. Getting flash messages to show up on some redirect requests, as they provide useful information to the user.
 
-If you have any other suggestion, please submit a feature request/issue/bug. Always looking for feedback! 
+If you have any suggestions, please submit a feature request/issue/bug. Always looking for feedback! 
