@@ -7,7 +7,7 @@ The user can add, edit or delete places from the database. It uses the [Play fra
 There is also a Java implementation of this project [here](https://github.com/muhsinali/picture-gallery) (rewrote it in Scala so I could learn Scala :grinning:).
 
 ####How to run the web app:
-To run the web app locally, start the MongoDB database using `mongod` and then go to the root directory of this project and run `activator run`. Once ready, go to http://localhost:9000 (if running for the first time, will need to wait a bit for the source code to compile).
+To run the web app locally, start the MongoDB database using `mongod` and then go to the root directory of this project and run `activator run`. Once ready, go to [http://localhost:9000](http://localhost:9000) (if running for the first time, will need to wait a bit for the source code to compile).
 
 ####Tech stack:
 - Scala 2.11.8
