@@ -104,7 +104,7 @@ object PlaceController {
 
    As a result, would prefer to use a method that generates a readable, self descriptive URL that's unique to each
    Place object, for example:
-   https:///www.example.com/this-is-a-self-descriptive-url
+   https://www.example.com/this-is-a-self-descriptive-url
    */
   private var placeID: Int = 0
   def generateID: Int = {
