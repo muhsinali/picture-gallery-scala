@@ -30,6 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
 
+  // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
     // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     val picture = pictureOpt.get
@@ -42,6 +43,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     }
   }
 
+  // Used to create instances of the Place class from JSON files at application startup
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
     for {
       places <- placesFuture
@@ -64,6 +66,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
 
+  // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
   def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
   def remove(id: Int): Future[Boolean] = {

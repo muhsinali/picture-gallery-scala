@@ -121,7 +121,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   // TODO find out how to make the picture a required field for a newly created Place
   /**
     * Handles the form post. It either inserts a Place into the database or edits an existing Place depending on whether
-    * the Place already has a UID (only existing Places have a UID).
+    * the Place already has an ID (only existing Places have an ID).
     */
   def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
     val boundForm = PlaceController.createPlaceForm.bindFromRequest()
