@@ -21,10 +21,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
-  * Created by Muhsin Ali on 01/10/2016.
-  */
-
-/**
   * PlaceController - acts as a DAO to instances of the Place class that are stored in the database.
   */
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller

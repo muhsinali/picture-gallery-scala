@@ -17,10 +17,6 @@ import scala.io.Source
 
 
 /**
-  * Created by Muhsin Ali on 29/09/2016.
-  */
-
-/**
   * Application is the entry point of this web application, and handles all HTTP requests for this web application.
   */
 class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, applicationLifecycle: ApplicationLifecycle)

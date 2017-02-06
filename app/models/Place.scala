@@ -3,10 +3,6 @@ package models
 import play.api.libs.json.Json   // implicit formatter for BSONObjectID
 
 /**
-  * Created by Muhsin Ali on 29/09/2016.
-  */
-
-/**
   * PlaceData
   * Used to gather information submitted in a form. This case class is used to decouple form submission and
   * validation from the corresponding model class.
