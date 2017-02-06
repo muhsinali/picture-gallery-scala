@@ -4,6 +4,7 @@ import java.io.File
 import javax.inject.Inject
 
 import models.{Place, PlaceData}
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json.{JsValue, Json}
@@ -124,30 +125,29 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     * the Place already has an ID (only existing Places have an ID).
     */
   def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
-    val boundForm = PlaceController.createPlaceForm.bindFromRequest()
-    boundForm.fold(
-      formWithErrors => {
-        Future(BadRequest(views.html.placeForm(formWithErrors)))
-      },
-      placeData => {
-        val writeResultFuture = placeData.id match {
-          case Some(id) => placeController.update(placeData, request.body.file("picture"))
-          case None => placeController.create(placeData, request.body.file("picture"))
-        }
+    def failure(formWithErrors: Form[PlaceData]) = {
+      Future(BadRequest(views.html.placeForm(formWithErrors)))
+    }
 
-        writeResultFuture.map{
-          case w: UpdateWriteResult =>
-            val flashMessage = if(w.ok) "success" -> "Successfully edited place" else "error" -> s"Could not edit place with id ${placeData.id.get}"
-            Redirect(routes.Application.showGridView()).flashing(flashMessage)
-
-          case w: WriteResult =>
-            val flashMessage = if(w.ok) "success" -> "Successfully added place" else "error" -> "Could not add place to database"
-            Redirect(routes.Application.showGridView()).flashing(flashMessage)
-
-          case _ => throw new IllegalArgumentException
-        }
+    def success(placeData: PlaceData) = {
+      val writeResultFuture = placeData.id match {
+        case Some(id) => placeController.update(placeData, request.body.file("picture"))
+        case None => placeController.create(placeData, request.body.file("picture"))
       }
-    )
+
+      writeResultFuture.map {
+        case w: UpdateWriteResult =>
+          val flashMessage = if (w.ok) "success" -> "Successfully edited place" else "error" -> s"Could not edit place with id ${placeData.id.get}"
+          Redirect(routes.Application.showGridView()).flashing(flashMessage)
+        case w: WriteResult =>
+          val flashMessage = if (w.ok) "success" -> "Successfully added place" else "error" -> "Could not add place to database"
+          Redirect(routes.Application.showGridView()).flashing(flashMessage)
+        case _ => throw new IllegalArgumentException
+      }
+    }
+
+    val boundForm = PlaceController.createPlaceForm.bindFromRequest()
+    boundForm.fold(failure, success)
   }
 }
 
