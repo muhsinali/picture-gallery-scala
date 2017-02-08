@@ -13,7 +13,7 @@ import play.api.mvc.Controller
 import play.api.mvc.MultipartFormData.FilePart
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -54,7 +54,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
   def findMany(jsObject: JsObject): Future[List[Place]] = placesFuture.flatMap(_.find(jsObject)
-    .cursor[Place](ReadPreference.primary).collect[List]())
+    .cursor[Place](ReadPreference.primaryPreferred).collect[List](Int.MaxValue, Cursor.FailOnError[List[Place]]()))
 
   // Might be able to use the OptionT monad transformer from Cats here - might remove the need to unwrap Options in
   // some of the methods in this class
