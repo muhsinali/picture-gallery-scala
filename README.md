@@ -27,7 +27,8 @@ Improvements:
 
 2. Would like to ensure that the user has uploaded a picture (i.e. I would like this to be a requirement using form validation).
 
-3. Use Place objects in the routes file instead of Int, but not sure how to uniquely represent a Place object in a URL without using a GUID (not a good idea to expose the internals of the application in the URL).
+3. Use Place objects in the routes file instead of Int, but not sure how to uniquely represent a Place object in a URL without using a GUID. GUIDs aren't a good idea as they make the URL harder to read and also expose the ID of Place objects stored in the database to the user. This is a security vulnerability. Would prefer a self-descriptive, readable URL such as:
+    https://www.example.com/this-is-a-self-descriptive-url
 
 4. Would like to improve the tests that I have currently written. Not sure how to include a mock object in a HTTP request that's then sent to the web app.
 
