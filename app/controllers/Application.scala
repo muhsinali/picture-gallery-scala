@@ -95,6 +95,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     }
   }
 
+  def index() = Action.async{implicit request => Future(Redirect(routes.Application.showGridView()))}
+
   def showGridView() = Action.async { implicit request =>
     placeController.getAllPlaces.map(placesList => {
       val numColumns = 3
