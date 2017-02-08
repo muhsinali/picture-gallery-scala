@@ -16,5 +16,7 @@ GET     /edit/:id                   controllers.Application.editPlace(id: Int)
 
 DELETE  /delete/:id                 controllers.Application.deletePlace(id: Int)
 
+GET     /not-found                  controllers.Application.fileNotFound
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

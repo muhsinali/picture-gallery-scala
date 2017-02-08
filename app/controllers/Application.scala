@@ -86,6 +86,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     }
   }
 
+  def fileNotFound() = Action.async {implicit request => Future(NotFound(views.html.notFound()))}
+
   def getPictureOfPlace(id: Int) = Action.async {
     placeController.findById(id).map {
       case Some(place) => Ok(place.picture);
