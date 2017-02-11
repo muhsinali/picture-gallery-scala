@@ -10,15 +10,15 @@ import play.api.test._
 class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
   "Routes" should {
-    "send 404 on a bad request" in  {
-      route(app, FakeRequest(GET, "/fake-request")).map(status) mustBe Some(NOT_FOUND)
+    "send 404 on an invalid URL path" in  {
+      route(app, FakeRequest(GET, "/fake-request")).map(status) mustBe Some(SEE_OTHER)
     }
   }
 
   "Application" should {
     // Application.showGridView tests
     "render the grid view" in {
-      val gridView = route(app, FakeRequest(GET, "/")).get
+      val gridView = route(app, FakeRequest(GET, "/grid")).get
       status(gridView) mustBe OK
       contentAsString(gridView) must include ("Grid view")
     }
@@ -54,7 +54,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
     }
     "fail on non-existent picture" in {
       val pictureOfNonExistentPlace = route(app, FakeRequest(GET, "/picture/9999")).get
-      status(pictureOfNonExistentPlace) mustBe BAD_REQUEST
+      status(pictureOfNonExistentPlace) mustBe NOT_FOUND
     }
 
 
