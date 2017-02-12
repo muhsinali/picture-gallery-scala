@@ -11,8 +11,11 @@ import play.api.test._
 class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
   "Routes" should {
-    "send 404 on an invalid URL path" in  {
-      route(app, FakeRequest(GET, "/fake-request")).map(status) mustBe Some(SEE_OTHER)
+    "redirect to 404 page on an invalid URL path" in  {
+      val nonExistentPath = route(app, FakeRequest(GET, "/fake-request")).get
+      val h = headers(nonExistentPath)
+      h("Location") mustBe "/not-found"
+      status(nonExistentPath) mustBe SEE_OTHER
     }
   }
 
