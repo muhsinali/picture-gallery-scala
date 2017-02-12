@@ -86,7 +86,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     }
   }
 
-  def fileNotFound() = Action.async {implicit request => Future(NotFound(views.html.notFound()))}
+  def fileNotFound() = Action{implicit request => NotFound(views.html.notFound())}
 
   def getPictureOfPlace(id: Int) = Action.async {
     placeController.findById(id).map {
@@ -95,7 +95,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     }
   }
 
-  def index() = Action.async{implicit request => Future(Redirect(routes.Application.showGridView()))}
+  def index() = Action{implicit request => Redirect(routes.Application.showGridView())}
 
   def showGridView() = Action.async { implicit request =>
     placeController.getAllPlaces.map(placesList => {
