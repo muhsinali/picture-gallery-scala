@@ -82,7 +82,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       case Some(placeFound) =>
         val placeData = PlaceData(Some(id), placeFound.name, placeFound.country, placeFound.description)
         Ok(views.html.placeForm(PlaceController.createPlaceForm.fill(placeData)))
-      case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with $id")
+      case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with ID $id")
     }
   }
 
