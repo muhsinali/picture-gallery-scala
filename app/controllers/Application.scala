@@ -38,7 +38,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     def getListOfFiles(dirPath: String) = {
       val dir = new File(dirPath)
       if(dir.exists() && dir.isDirectory){
-        dir.listFiles.filter(f => f.isFile && f.toString.endsWith(".json")).toList
+        dir.listFiles.filter(f => f.isFile && f.getPath.endsWith(".json")).toList
       } else {
         List[File]()
       }
@@ -47,7 +47,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     def getJsonProperty(jsValue: JsValue, field: String) = (jsValue \ field).as[String].replace("\"", "")
 
     // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
-    val jsonFiles = getListOfFiles("./public/jsonFiles")
+    val jsonFiles = getListOfFiles("public/jsonFiles")
     for(f <- jsonFiles) {
       val source = Source.fromFile(f)
       val parsedJson: JsValue = Json.parse(source.mkString)
