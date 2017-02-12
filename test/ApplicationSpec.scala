@@ -13,9 +13,9 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
   "Routes" should {
     "redirect to 404 page on an invalid URL path" in  {
       val nonExistentPath = route(app, FakeRequest(GET, "/fake-request")).get
-      val h = headers(nonExistentPath)
-      h("Location") mustBe "/not-found"
       status(nonExistentPath) mustBe SEE_OTHER
+      val requestHeaders = headers(nonExistentPath)
+      requestHeaders("Location") mustBe "/not-found"
     }
   }
 
@@ -57,8 +57,10 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
       status(pictureOfPlace) mustBe OK
     }
     "fail on non-existent picture" in {
-      val pictureOfNonExistentPlace = route(app, FakeRequest(GET, "/picture/9999")).get
+      val id = 9999
+      val pictureOfNonExistentPlace = route(app, FakeRequest(GET, s"/picture/$id")).get
       status(pictureOfNonExistentPlace) mustBe NOT_FOUND
+      contentAsString(pictureOfNonExistentPlace) must include (s"Could not find picture for place with ID $id")
     }
 
 
@@ -88,17 +90,25 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
       val editPlace = route(app, FakeRequest(GET, "/edit/3")).get
       status(editPlace) mustBe OK
     }
+    "fail on editing a non-existent place" in {
+      val id = 9999
+      val editPlace = route(app, FakeRequest(GET, s"/edit/$id")).get
+      status(editPlace) mustBe SEE_OTHER
+      val requestHeaders = headers(editPlace)
+      requestHeaders("Location") mustBe "/grid"
+      requestHeaders("Set-Cookie") must include (s"Could+not+find+place+with+ID+$id")
+    }
 
     // Application.deletePlace() tests
     "delete place" in {
       val id = 3
       val deletePlace = route(app, FakeRequest(DELETE, s"/delete/$id")).get
       status(deletePlace) mustBe SEE_OTHER
-      val h = headers(deletePlace)
-      h("Location") mustBe "/grid"
-      h("Set-Cookie") must include (s"Deleted+place+with+ID+$id")
+      val requestHeaders = headers(deletePlace)
+      requestHeaders("Location") mustBe "/grid"
+      requestHeaders("Set-Cookie") must include (s"Deleted+place+with+ID+$id")
     }
-    "fail on deleting non-existent place" in {
+    "fail on deleting a non-existent place" in {
       val id = 9999
       val deletePlace = route(app, FakeRequest(DELETE, s"/delete/$id")).get
       ScalaFutures.whenReady(deletePlace.failed) { e =>
