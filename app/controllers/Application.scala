@@ -44,7 +44,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       }
     }
 
-    def getJsonProperty(jsValue: JsValue, field: String) = (jsValue \ field).get.toString().replace("\"", "")
+    def getJsonProperty(jsValue: JsValue, field: String) = (jsValue \ field).as[String].replace("\"", "")
 
     // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
     val jsonFiles = getListOfFiles("./public/jsonFiles")
