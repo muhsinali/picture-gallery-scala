@@ -1,0 +1,14 @@
+language: scala
+scala:
+- 2.11.8
+jdk:
+- oraclejdk8
+services:
+- mongodb
+before_script:
+- sleep 15
+deploy:
+  provider: heroku
+  app: muhsinali-picture-gallery
+  api_key:
+    secure: Rsrxzrw4GHr86S3aDsT6CY2JV9WtO75gtH42U4gEL70+wHLX3Z7/kssaJZC+PSXyGIcl4JGRor7xUHL97OgVqDrxAGPRk3/iFZw4OiieQNKZF1DexqDTuqDXL92q2XYc9XtmCIIq9bd+TE0iOBbPdcbMLxH0YKoHSnKFFaMrV/zls/EjvZZyPFVON13NrbDYDkts94/RG8Db0R89LbwFe2gVYZR99PAwVGVXuRZX4a9Z/XNFLi+OKL51Qg867Fk4JwECnbTNtOl7f0bxAqPSMuH8FvbFcGYm/5lCZqI0LA2jy9R3Cytsp9JP1K0atGn8OB1BXkb4cIFNoZQhrr30d0W6c8jKGZEeYWjunzWPdGGsoG2j6Z+k4wdXi/6Kyi3LJDv38HZA2w8woL4lYtNjIOwNdQKqLjO0bplzXPkGTw0qdcb3ETRa5rKFZRCJkkPtZ+vWBWZPbiKGRoOpR+zTOOR97yzT4596ybyDRRtrvkK630TXpm8MZZkywE79Y8TA1x4huhfp0my+DhZMiAhm/VP1pGv1Ri9y/sJwsxScMjaDCsGWrSPxzXnBViJVppM4Lod+xv22hHT446BwVXYAUWuu/HjnMnYYo/kluCvTC9fdmexEwl/sKVA6Q21xJdtjmXG1TEQvGeRRKUtWYWU6FTF3oYgBwy0RyYtp9Top4KY=
