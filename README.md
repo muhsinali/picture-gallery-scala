@@ -1,4 +1,4 @@
-Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-scala.svg?branch=master)](https://travis-ci.org/muhsinali/picture-gallery-scala)
+Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-scala.svg?branch=master)](https://travis-ci.org/muhsinali/picture-gallery-scala) [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 =================================
 ![alt tag](public/images/pictureGallery.png)
 
