@@ -1,0 +1,13 @@
+{
+  "name": "muhsinali-picture-gallery",
+  "description": "RESTful web app built using Scala, Play and MongoDB",
+  "repository": "https://github.com/muhsinali/picture-gallery-scala",
+  "keywords": ["scala", "play", "reactivemongo"],
+  "env":{
+    "APPLICATION_SECRET": {
+      "description": "A secret key to sign cookies with",
+      "generator": "secret"
+    }
+  },
+  "addons": ["mongolab"]
+}

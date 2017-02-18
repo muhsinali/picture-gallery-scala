@@ -1,0 +1,1 @@
+web: target/universal/stage/bin/picture-gallery -Dhttp.port=${PORT} -Dmongodb.uri=${MONGODB_URI} -Dplay.crypto.secret=${APPLICATION_SECRET}
