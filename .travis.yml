@@ -6,7 +6,7 @@ jdk:
 services:
 - mongodb
 before_script:
-- sleep 15
+- sleep 150
 deploy:
   provider: heroku
   app: muhsinali-picture-gallery
