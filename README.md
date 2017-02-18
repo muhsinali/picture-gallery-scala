@@ -1,4 +1,4 @@
-Introduction:
+Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-scala.svg?branch=master)](https://travis-ci.org/muhsinali/picture-gallery-scala)
 =================================
 ![alt tag](public/images/pictureGallery.png)
 
