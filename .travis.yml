@@ -1,3 +1,4 @@
+sudo: required
 language: scala
 scala:
 - 2.11.8
@@ -6,7 +7,7 @@ jdk:
 services:
 - mongodb
 before_script:
-- sleep 150
+- sleep 15
 deploy:
   provider: heroku
   app: muhsinali-picture-gallery
