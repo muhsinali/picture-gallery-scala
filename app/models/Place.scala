@@ -14,7 +14,7 @@ case class PlaceData(id: Option[Int], name: String, country: String, description
 /**
   * Place - a point of interest that the user would like to store in the database.
   */
-case class Place (id: Int, name: String, country: String, description: String, picture: Array[Byte]) {
+case class Place (id: Int, name: String, country: String, description: String, picture: String) {
   override def toString: String = id.toString
 }
 

@@ -81,19 +81,12 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     placeController.findById(id).map {
       case Some(placeFound) =>
         val placeData = PlaceData(Some(id), placeFound.name, placeFound.country, placeFound.description)
-        Ok(views.html.placeForm(PlaceController.createPlaceForm.fill(placeData)))
+        Ok(views.html.placeForm(PlaceController.createPlaceForm.fill(placeData), Some(placeFound.picture)))
       case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with ID $id")
     }
   }
 
   def fileNotFound() = Action{implicit request => NotFound(views.html.notFound())}
-
-  def getPictureOfPlace(id: Int) = Action.async {
-    placeController.findById(id).map {
-      case Some(place) => Ok(place.picture);
-      case None => NotFound(s"Could not find picture for place with ID $id")
-    }
-  }
 
   def index() = Action{implicit request => Redirect(routes.Application.showGridView())}
 
@@ -116,7 +109,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     }
   }
 
-  def showPlaceForm = Action {implicit request => Ok(views.html.placeForm(PlaceController.createPlaceForm))}
+  def showPlaceForm = Action {implicit request => Ok(views.html.placeForm(PlaceController.createPlaceForm, None))}
 
 
   // TODO find out how to make the picture a required field for a newly created Place
@@ -126,7 +119,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     */
   def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
     def failure(formWithErrors: Form[PlaceData]) = {
-      Future(BadRequest(views.html.placeForm(formWithErrors)))
+      Future(BadRequest(views.html.placeForm(formWithErrors, None)))
     }
 
     def success(placeData: PlaceData) = {

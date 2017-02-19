@@ -1,4 +1,4 @@
-@(placeForm: Form[PlaceData])(implicit flash: Flash, messages: Messages)
+@(placeForm: Form[PlaceData], pictureOfPlace: Option[String])(implicit flash: Flash, messages: Messages)
 @import helper._
 @import controllers.PlaceController
 
@@ -30,10 +30,10 @@
         }
     </div>
 
-        @if(placeForm("id").value.isDefined){
+        @if(pictureOfPlace.isDefined){
             <div id="right-div" class="pull-right">
                 <h4>Current picture</h4>
-                <img src="@routes.Application.getPictureOfPlace(placeForm("id").value.get.toInt)" />
+                <img src="data:image/jpg;base64,@pictureOfPlace.get" />
             </div>
         }
 </div>

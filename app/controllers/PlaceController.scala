@@ -16,6 +16,7 @@ import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMo
 import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.play.json.collection.JSONCollection
+import sun.misc.BASE64Encoder
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,6 +27,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
 
+  private val base64Encoder = new BASE64Encoder()
+
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
     // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
@@ -33,7 +36,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     for {
       places <- placesFuture
       writeResult <- places.insert(Place(PlaceController.generateID, placeData.name, placeData.country, placeData.description,
-        Files.toByteArray(picture.ref.file)))
+        base64Encoder.encode(Files.toByteArray(picture.ref.file))))
     } yield {
       writeResult
     }
@@ -43,7 +46,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
     for {
       places <- placesFuture
-      writeResult <- places.insert(Place(id, name, country, description, Files.toByteArray(picture)))
+      writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture))))
     } yield {
       writeResult
     }
@@ -81,7 +84,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     for {
       places <- placesFuture
       placeOpt <- findById(id)
-      picture = if(pictureOpt.get.filename != "") Files.toByteArray(pictureOpt.get.ref.file) else placeOpt.get.picture
+      picture = if(pictureOpt.get.filename != "") base64Encoder.encode(Files.toByteArray(pictureOpt.get.ref.file)) else placeOpt.get.picture
       updateWriteResult <- places.update(Json.obj("id" -> id), Place(id, placeData.name, placeData.country, placeData.description, picture))
     } yield {
       updateWriteResult

@@ -19,7 +19,7 @@
     <tr>
         <td><a href="@routes.Application.showPlace(currentPlace.id)">@currentPlace.name</a></td>
         <td><a href="@routes.Application.showPlace(currentPlace.id)">@currentPlace.country</a></td>
-        <td><a href="@routes.Application.showPlace(currentPlace.id)"><img style="height: 50px" src="@routes.Application.getPictureOfPlace(currentPlace.id)"/></a></td>
+        <td><a href="@routes.Application.showPlace(currentPlace.id)"><img style="height: 50px" src="data:image/jpg;base64,@currentPlace.picture"/></a></td>
         <td><a class="glyphicon glyphicon-pencil" href="@routes.Application.editPlace(currentPlace.id)"></a></td>
         <td><a class="glyphicon glyphicon-trash" onclick="javascript:del('@routes.Application.deletePlace(currentPlace.id)')"></a></td>
     </tr>
