@@ -1,19 +1,17 @@
 package controllers
 
-import java.io.File
 import javax.inject.Inject
 
 import models.{Place, PlaceData}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.io.Source
 
 
 /**
@@ -25,48 +23,6 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
   implicit val formatter = Json.format[Place]
   val placeController = new PlaceController(reactiveMongoApi)
-
-  onStartup()
-  applicationLifecycle.addStopHook {() => onShutdown()}
-
-
-  /**
-    * Populates database with Places at application startup.
-    */
-  def onStartup() = {
-    // Get a list of all the files in a directory
-    def getListOfFiles(dirPath: String) = {
-      val dir = new File(dirPath)
-      if(dir.exists() && dir.isDirectory){
-        dir.listFiles.filter(f => f.isFile && f.getPath.endsWith(".json")).toList
-      } else {
-        List[File]()
-      }
-    }
-
-    def getJsonProperty(jsValue: JsValue, field: String) = (jsValue \ field).as[String].replace("\"", "")
-
-    // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
-    val jsonFiles = getListOfFiles("public/jsonFiles")
-    for(f <- jsonFiles) {
-      val source = Source.fromFile(f)
-      val parsedJson: JsValue = Json.parse(source.mkString)
-      val id = PlaceController.generateID
-      val name = getJsonProperty(parsedJson, "name")
-      val country = getJsonProperty(parsedJson, "country")
-      val description = getJsonProperty(parsedJson, "description")
-      val picture = new File(getJsonProperty(parsedJson, "picture"))
-      source.close()
-
-      placeController.create(id, name, country, description, picture)
-    }
-  }
-
-  /**
-    * Clears database at application shutdown.
-    */
-  def onShutdown() = placeController.drop()
-
 
 
   // TODO get the flash scope to work
@@ -139,8 +95,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       }
     }
 
-    val boundForm = PlaceController.createPlaceForm.bindFromRequest()
-    boundForm.fold(failure, success)
+    PlaceController.createPlaceForm.bindFromRequest().fold(failure, success)
   }
 }
 
