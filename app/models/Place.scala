@@ -1,6 +1,6 @@
 package models
 
-import play.api.libs.json.Json   // implicit formatter for BSONObjectID
+import play.api.libs.json.Json
 
 /**
   * PlaceData
