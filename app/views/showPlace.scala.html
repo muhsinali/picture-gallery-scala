@@ -1,7 +1,7 @@
 @(place: Place)(implicit flash: Flash)
 
 
-@main("Show place"){
+@main(place.name){
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/showPlace.css")">
 }{
 <div id="place-details">
