@@ -10,16 +10,17 @@ import play.api.test._
  */
 class ApplicationSpec extends PlaySpec with OneAppPerSuite {
 
-  "Routes" should {
+  "Application" should {
+
+    // Application.fileNotFound tests
     "redirect to 404 page on an invalid URL path" in  {
       val nonExistentPath = route(app, FakeRequest(GET, "/fake-request")).get
       status(nonExistentPath) mustBe SEE_OTHER
       val requestHeaders = headers(nonExistentPath)
       requestHeaders("Location") mustBe "/not-found"
     }
-  }
 
-  "Application" should {
+
     // Application.showGridView tests
     "render the grid view" in {
       val gridView = route(app, FakeRequest(GET, "/grid")).get
@@ -50,19 +51,6 @@ class ApplicationSpec extends PlaySpec with OneAppPerSuite {
       val placeForm = route(app, FakeRequest(GET, "/add")).get
       status(placeForm) mustBe OK
     }
-
-    // Application.getPictureOfPlace() tests
-    "get picture of place" in {
-      val pictureOfPlace = route(app, FakeRequest(GET, "/picture/3")).get
-      status(pictureOfPlace) mustBe OK
-    }
-    "fail on non-existent picture" in {
-      val id = 9999
-      val pictureOfNonExistentPlace = route(app, FakeRequest(GET, s"/picture/$id")).get
-      status(pictureOfNonExistentPlace) mustBe NOT_FOUND
-      contentAsString(pictureOfNonExistentPlace) must include (s"Could not find picture for place with ID $id")
-    }
-
 
 //    // TODO Need to implement a Writable to include multipart form data in a request
 //    "add a mock place" in {
