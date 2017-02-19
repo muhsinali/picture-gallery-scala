@@ -3,7 +3,7 @@ package services
 import java.io.File
 import javax.inject.{Inject, Singleton}
 
-import controllers.PlaceDAO
+import dao.PlaceDAO
 import play.Environment
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle

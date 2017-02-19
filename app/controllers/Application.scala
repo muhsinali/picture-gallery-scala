@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import dao.PlaceDAO
 import models.{Place, PlaceData}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}

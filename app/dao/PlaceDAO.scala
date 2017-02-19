@@ -1,4 +1,4 @@
-package controllers
+package dao
 
 import java.io.File
 import javax.inject.Inject
