@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
-  * Application is the entry point of this web application, and handles all HTTP requests for this web application.
+  * Application is the entry point of this web application and handles all HTTP requests for this web application.
   */
 class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, applicationLifecycle: ApplicationLifecycle)
                            (implicit ec: ExecutionContext)
