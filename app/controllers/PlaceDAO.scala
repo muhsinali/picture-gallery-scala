@@ -13,8 +13,8 @@ import play.api.mvc.Controller
 import play.api.mvc.MultipartFormData.FilePart
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
-import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.play.json.collection.JSONCollection
 import sun.misc.BASE64Encoder
 
@@ -29,68 +29,63 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
 
   private val base64Encoder = new BASE64Encoder()
 
+  // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
+  private def placesCollection: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
+
+
+
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
     // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     val picture = pictureOpt.get
     for {
-      places <- placesFuture
+      places <- placesCollection
       writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
         base64Encoder.encode(Files.toByteArray(picture.ref.file))))
-    } yield {
-      writeResult
-    }
+    } yield writeResult
   }
 
   // Used to create instances of the Place class from JSON files at application startup
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
     for {
-      places <- placesFuture
+      places <- placesCollection
       writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture))))
-    } yield {
-      writeResult
-    }
+    } yield writeResult
   }
 
-  def drop() = placesFuture.map(_.drop(failIfNotFound = true))
+  def drop() = placesCollection.map(_.drop(failIfNotFound = true))
 
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
-  def findMany(jsObject: JsObject): Future[List[Place]] = placesFuture.flatMap(_.find(jsObject)
+  def findMany(jsObject: JsObject): Future[List[Place]] = placesCollection.flatMap(_.find(jsObject)
     .cursor[Place](ReadPreference.primaryPreferred).collect[List](Int.MaxValue, Cursor.FailOnError[List[Place]]()))
 
   // Might be able to use the OptionT monad transformer from Cats here - might remove the need to unwrap Options in
   // some of the methods in this class
-  def findOne(jsObject: JsObject): Future[Option[Place]] = placesFuture.flatMap(_.find(jsObject).one[Place](ReadPreference.primary))
+  def findOne(jsObject: JsObject): Future[Option[Place]] = placesCollection.flatMap(_.find(jsObject).one[Place](ReadPreference.primary))
 
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
-
-  // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
-  private def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
   def remove(id: Int): Future[Boolean] = {
     for {
       placeToDelete <- findById(id)
       if placeToDelete.isDefined
-      places <- placesFuture
+      places <- placesCollection
       writeResult <- places.remove[Place](placeToDelete.get, firstMatchOnly = true)
-    } yield {
-      writeResult.ok
-    }
+    } yield writeResult.ok
   }
 
   def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
     val id = placeData.id.get   // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     for {
-      places <- placesFuture
+      places <- placesCollection
       placeOpt <- findById(id)
       picture = if(pictureOpt.get.filename != "") base64Encoder.encode(Files.toByteArray(pictureOpt.get.ref.file)) else placeOpt.get.picture
       updateWriteResult <- places.update(Json.obj("id" -> id), Place(id, placeData.name, placeData.country, placeData.description, picture))
-    } yield {
-      updateWriteResult
-    }
+    } yield updateWriteResult
   }
 }
+
 
 
 
