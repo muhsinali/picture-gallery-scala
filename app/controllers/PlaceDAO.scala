@@ -22,9 +22,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
-  * PlaceController - acts as a DAO to instances of the Place class that are stored in the database.
+  * PlaceDAO - acts as a DAO to instances of the Place class that are stored in the database.
   */
-class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
+class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
 
   private val base64Encoder = new BASE64Encoder()
@@ -35,7 +35,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
     val picture = pictureOpt.get
     for {
       places <- placesFuture
-      writeResult <- places.insert(Place(PlaceController.generateID, placeData.name, placeData.country, placeData.description,
+      writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
         base64Encoder.encode(Files.toByteArray(picture.ref.file))))
     } yield {
       writeResult
@@ -66,7 +66,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
 
   // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
-  def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
+  private def placesFuture: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
   def remove(id: Int): Future[Boolean] = {
     for {
@@ -94,7 +94,7 @@ class PlaceController @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit
 
 
 
-object PlaceController {
+object PlaceDAO {
   /* STOPSHIP
    NOTE:
    The method used here to generate IDs is not the best. Could use a GUID (e.g. one generated using the

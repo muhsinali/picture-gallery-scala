@@ -3,7 +3,7 @@ package services
 import java.io.File
 import javax.inject.{Inject, Singleton}
 
-import controllers.PlaceController
+import controllers.PlaceDAO
 import play.Environment
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle
@@ -20,7 +20,7 @@ import scala.io.Source
 class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, env: Environment,
                                         lifecycle: ApplicationLifecycle)(implicit ec: ExecutionContext){
 
-  val placeController = new PlaceController(reactiveMongoApi)
+  val placeController = new PlaceDAO(reactiveMongoApi)
   onStartup()
   lifecycle.addStopHook(() => onShutdown())
 
@@ -48,7 +48,7 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, env:
     for(f <- jsonFiles) {
       val source = Source.fromFile(f)
       val parsedJson: JsValue = Json.parse(source.mkString)
-      val id = PlaceController.generateID
+      val id = PlaceDAO.generateID
       val name = getJsonProperty(parsedJson, "name")
       val country = getJsonProperty(parsedJson, "country")
       val description = getJsonProperty(parsedJson, "description")

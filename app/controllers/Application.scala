@@ -22,7 +22,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   extends Controller with MongoController with ReactiveMongoComponents with I18nSupport {
 
   implicit val formatter = Json.format[Place]
-  val placeController = new PlaceController(reactiveMongoApi)
+  val placeController = new PlaceDAO(reactiveMongoApi)
 
 
   // TODO get the flash scope to work
@@ -37,7 +37,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     placeController.findById(id).map {
       case Some(placeFound) =>
         val placeData = PlaceData(Some(id), placeFound.name, placeFound.country, placeFound.description)
-        Ok(views.html.placeForm(PlaceController.createPlaceForm.fill(placeData), Some(placeFound.picture)))
+        Ok(views.html.placeForm(PlaceDAO.createPlaceForm.fill(placeData), Some(placeFound.picture)))
       case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with ID $id")
     }
   }
@@ -65,7 +65,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     }
   }
 
-  def showPlaceForm = Action {implicit request => Ok(views.html.placeForm(PlaceController.createPlaceForm, None))}
+  def showPlaceForm = Action {implicit request => Ok(views.html.placeForm(PlaceDAO.createPlaceForm, None))}
 
 
   // TODO find out how to make the picture a required field for a newly created Place
@@ -95,7 +95,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
       }
     }
 
-    PlaceController.createPlaceForm.bindFromRequest().fold(failure, success)
+    PlaceDAO.createPlaceForm.bindFromRequest().fold(failure, success)
   }
 }
 
