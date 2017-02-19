@@ -24,7 +24,7 @@
 
     @if(place.picture != null){
         <div id="right-div" class="pull-right">
-            <img src="@routes.Application.getPictureOfPlace(place.id)" />
+            <img src="data:image/jpg;base64,@place.picture" />
         </div>
     }
 </div>
