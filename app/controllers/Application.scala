@@ -23,19 +23,19 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   extends Controller with MongoController with ReactiveMongoComponents with I18nSupport {
 
   implicit val formatter = Json.format[Place]
-  val placeController = new PlaceDAO(reactiveMongoApi)
+  val placeDAO = new PlaceDAO(reactiveMongoApi)
 
 
   // TODO get the flash scope to work
   def deletePlace(id: Int) = Action.async { implicit request =>
-    placeController.remove(id).map {
+    placeDAO.remove(id).map {
       case true => Redirect(routes.Application.showGridView()).flashing("success" -> s"Deleted place with ID $id")
       case false => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not delete place with ID $id")
     }
   }
 
   def editPlace(id: Int) = Action.async { implicit request =>
-    placeController.findById(id).map {
+    placeDAO.findById(id).map {
       case Some(placeFound) =>
         val placeData = PlaceData(Some(id), placeFound.name, placeFound.country, placeFound.description)
         Ok(views.html.placeForm(PlaceDAO.createPlaceForm.fill(placeData), Some(placeFound.picture)))
@@ -48,19 +48,19 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
   def index() = Action{implicit request => Redirect(routes.Application.showGridView())}
 
   def showGridView() = Action.async { implicit request =>
-    placeController.getAllPlaces.map(placesList => {
+    placeDAO.getAllPlaces.map(placesList => {
       val numColumns = 3
       val numRows = math.ceil(placesList.length / numColumns.toDouble).toInt
       Ok(views.html.grid(placesList, numRows, numColumns))
     })
   }
 
-  def showListView = Action.async {implicit request => placeController.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))}
+  def showListView = Action.async {implicit request => placeDAO.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))}
 
 
   // TODO get flash scope to work
   def showPlace(id: Int) = Action.async { implicit request =>
-    placeController.findById(id).map {
+    placeDAO.findById(id).map {
       case Some(place) => Ok(views.html.showPlace(place))
       case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Cannot find place with id $id")
     }
@@ -81,8 +81,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
     def success(placeData: PlaceData) = {
       val writeResultFuture = placeData.id match {
-        case Some(id) => placeController.update(placeData, request.body.file("picture"))
-        case None => placeController.create(placeData, request.body.file("picture"))
+        case Some(id) => placeDAO.update(placeData, request.body.file("picture"))
+        case None => placeDAO.create(placeData, request.body.file("picture"))
       }
 
       writeResultFuture.map {
