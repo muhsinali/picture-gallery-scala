@@ -2,6 +2,8 @@ Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-sc
 =================================
 ![alt tag](public/images/pictureGallery.png)
 
+### [Try out project here](http://gallery.muhsinali.xyz)
+
 This is a RESTful, CRUD web application that stores places of interest in a database and displays them either using a grid or a list layout back to the user.
 
 The user can add, edit or delete places from the database. It uses the [Play framework](https://www.playframework.com/) and the MVC pattern, and is currently configured to run locally on one's machine.
@@ -31,5 +33,14 @@ Improvements
 3. Would like to improve the tests that I have currently written. Not sure how to include a mock object in a HTTP request that's then sent to the web app.
 
 4. Getting flash messages to show up on some redirect requests, as they provide useful information to the user.
+
+
+
+
+Future work
+=================================
+- Store pictures in Amazon S3
+- Add user authentication
+
 
 If you have any suggestions, please submit a pull request/issue/bug. Always looking for feedback! 
