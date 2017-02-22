@@ -20,7 +20,7 @@ import scala.io.Source
 class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, env: Environment,
                                         lifecycle: ApplicationLifecycle)(implicit ec: ExecutionContext){
 
-  val placeController = new PlaceDAO(reactiveMongoApi)
+  val placeDAO = new PlaceDAO(reactiveMongoApi)
   onStartup()
   lifecycle.addStopHook(() => onShutdown())
 
@@ -54,8 +54,7 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, env:
       val description = getJsonProperty(parsedJson, "description")
       val picture = new File(getJsonProperty(parsedJson, "picture"))
       source.close()
-
-      placeController.create(id, name, country, description, picture)
+      placeDAO.create(id, name, country, description, picture)
     }
   }
 
@@ -64,6 +63,6 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, env:
     */
   def onShutdown() = {
     Logger.info("Clearing database on shutdown")
-    placeController.drop()
+    placeDAO.drop()
   }
 }
