@@ -34,4 +34,13 @@ Improvements
 
 4. Getting flash messages to show up on some redirect requests, as they provide useful information to the user.
 
+
+
+
+Future work
+=================================
+- Store pictures in Amazon S3
+- Add user authentication
+
+
 If you have any suggestions, please submit a pull request/issue/bug. Always looking for feedback! 
