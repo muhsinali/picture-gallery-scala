@@ -22,7 +22,19 @@ To run the web app locally, start the MongoDB database using `mongod` and then g
 
 
 
-Improvements
+Roadmap
+=================================
+- [ ] Optimise page load speeds:
+    - [ ] Store images using Amazon S3
+    - [ ] Use Amazon CloudFront so that images are fetched from the closest CDN node; reduces the latency of delivering images
+    - [ ] Use [Scrimage](https://github.com/sksamuel/scrimage) to dynamically generate thumbnails for every uploaded image (to reduce the size of the image used in the grid and list views)
+    - [ ] Add pagination to limit the number of images shown on the page
+- [ ] Add user authentication
+
+
+
+
+Known issues
 =================================
 
 1. Would like to ensure that the user has uploaded a picture (i.e. I would like this to be a requirement using form validation).
@@ -33,14 +45,6 @@ Improvements
 3. Would like to improve the tests that I have currently written. Not sure how to include a mock object in a HTTP request that's then sent to the web app.
 
 4. Getting flash messages to show up on some redirect requests, as they provide useful information to the user.
-
-
-
-
-Future work
-=================================
-- Store pictures in Amazon S3
-- Add user authentication
 
 
 If you have any suggestions, please submit a pull request/issue/bug. Always looking for feedback! 
