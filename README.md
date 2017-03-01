@@ -26,8 +26,8 @@ Roadmap
 =================================
 - [ ] Optimise page load speeds:
     - [ ] Store images using Amazon S3
+    - [ ] Use [Scrimage](https://github.com/sksamuel/scrimage) to dynamically generate thumbnails for every uploaded image (to reduce the size of the images used in the grid and list views)
     - [ ] Use Amazon CloudFront so that images are fetched from the closest CDN node; reduces the latency of delivering images
-    - [ ] Use [Scrimage](https://github.com/sksamuel/scrimage) to dynamically generate thumbnails for every uploaded image (to reduce the size of the image used in the grid and list views)
     - [ ] Add pagination to limit the number of images shown on the page
 - [ ] Add user authentication
 
