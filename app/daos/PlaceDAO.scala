@@ -64,9 +64,9 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
     } yield writeResult
   }
 
-  def drop() = {
+  def drop(): Future[Boolean] = {
     s3DAO.emptyBucket()
-    placesCollection.map(_.drop(failIfNotFound = true))
+    placesCollection.flatMap(_.drop(failIfNotFound = true))
   }
 
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))

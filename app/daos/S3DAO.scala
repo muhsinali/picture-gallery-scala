@@ -29,9 +29,7 @@ class S3DAO(val bucketName: String) {
     var objectListing = s3.listObjects(bucketName)
     while(true){
       val objectSummaries: Iterable[S3ObjectSummary] = objectListing.getObjectSummaries.asScala
-      for(obj <- objectSummaries) {
-        deleteFile(obj.getKey)
-      }
+      objectSummaries.foreach(obj => deleteFile(obj.getKey))
 
       if(!objectListing.isTruncated) return
       objectListing = s3.listNextBatchOfObjects(objectListing)

@@ -63,7 +63,7 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, env:
   /**
     * Clears database at application shutdown.
     */
-  def onShutdown(): Future[_] = {
+  def onShutdown(): Future[Boolean] = {
     Logger.info("Clearing database on shutdown")
     placeDAO.drop()
   }
