@@ -38,7 +38,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     placeDAO.findById(id).map {
       case Some(placeFound) =>
         val placeData = PlaceData(Some(id), placeFound.name, placeFound.country, placeFound.description)
-        Ok(views.html.placeForm(PlaceDAO.createPlaceForm.fill(placeData), Some(placeFound.picture)))
+        Ok(views.html.placeForm(PlaceDAO.createPlaceForm.fill(placeData), Some(placeFound.pictureUrl)))
       case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with ID $id")
     }
   }

@@ -10,7 +10,7 @@
         @if(numColumns * r + c < places.length){
             <div class="col-md-4">
                 <a class="thumbnail" href="@routes.Application.showPlace(places(numColumns * r + c).id)">
-                    <img src="data:image/jpg;base64,@places(numColumns * r + c).picture" />
+                    <img src="@places(numColumns * r + c).pictureUrl" />
                 </a>
             </div>
         }

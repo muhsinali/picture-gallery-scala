@@ -1,4 +1,4 @@
-@(placeForm: Form[PlaceData], pictureOfPlace: Option[String])(implicit flash: Flash, messages: Messages)
+@(placeForm: Form[PlaceData], pictureUrl: Option[String])(implicit flash: Flash, messages: Messages)
 @import helper._
 
 
@@ -29,10 +29,10 @@
         }
     </div>
 
-        @if(pictureOfPlace.isDefined){
+        @if(pictureUrl.isDefined){
             <div id="right-div" class="pull-right">
                 <h4>Current picture</h4>
-                <img src="data:image/jpg;base64,@pictureOfPlace.get" />
+                <img src="@pictureUrl.get" />
             </div>
         }
 </div>
