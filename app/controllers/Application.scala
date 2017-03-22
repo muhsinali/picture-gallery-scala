@@ -82,14 +82,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
     def success(placeData: PlaceData) = {
       val writeResultFuture = placeData.id match {
-        case Some(id) => {
-          placeDAO.update(placeData, request.body.file("picture"), UUID.randomUUID().toString)
-          // TODO invoke s3.uploadFile() here
-        }
-        case None => {
-          placeDAO.create(placeData, request.body.file("picture"), UUID.randomUUID().toString)
-          // TODO invoke s3.uploadFile() here
-        }
+        case Some(id) => placeDAO.update(placeData, request.body.file("picture"))
+        case None => placeDAO.create(placeData, request.body.file("picture"))
       }
 
       writeResultFuture.map {

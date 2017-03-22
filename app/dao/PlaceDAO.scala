@@ -1,6 +1,7 @@
 package dao
 
 import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 
 import com.google.common.io.Files
@@ -28,6 +29,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
   with MongoController with ReactiveMongoComponents {
 
   private val base64Encoder = new BASE64Encoder()
+  private val s3DAO = new S3DAO("muhsinali-picture-gallery")
 
   // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
   private def placesCollection: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
@@ -35,7 +37,9 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
 
 
   // Used to create Place objects from a form submitted by the user
-  def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]], key: String): Future[WriteResult] = {
+  def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
+    val key = UUID.randomUUID().toString
+    // TODO use s3DAO here
     // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     val picture = pictureOpt.get
     for {
@@ -46,7 +50,10 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
   }
 
   // Used to create instances of the Place class from JSON files at application startup
-  def create(id: Int, name: String, country: String, description: String, picture: File, key: String): Future[WriteResult] = {
+  def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
+    val key = UUID.randomUUID().toString
+    // TODO use s3DAO here
+
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture)), key))
@@ -75,7 +82,11 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
     } yield writeResult.ok
   }
 
-  def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]], key: String): Future[UpdateWriteResult] = {
+  def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
+    val key = UUID.randomUUID().toString
+    // TODO use s3DAO here
+
+
     val id = placeData.id.get   // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     for {
       places <- placesCollection
