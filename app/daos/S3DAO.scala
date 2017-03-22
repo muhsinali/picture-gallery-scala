@@ -4,8 +4,10 @@ import java.io.File
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.s3.model.{CannedAccessControlList, PutObjectRequest}
+import com.amazonaws.services.s3.model.{CannedAccessControlList, PutObjectRequest, S3ObjectSummary}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+
+import scala.collection.JavaConverters._
 
 class S3DAO(val bucketName: String) {
   private val s3: AmazonS3 = AmazonS3ClientBuilder.standard()
@@ -18,10 +20,21 @@ class S3DAO(val bucketName: String) {
     s3.getUrl(bucketName, key).toString
   }
 
-
-
   def deleteFile(key: String): Unit = {
     s3.deleteObject(bucketName, key)
   }
 
+
+  def emptyBucket(): Unit = {
+    var objectListing = s3.listObjects(bucketName)
+    while(true){
+      val objectSummaries: Iterable[S3ObjectSummary] = objectListing.getObjectSummaries.asScala
+      for(obj <- objectSummaries) {
+        deleteFile(obj.getKey)
+      }
+
+      if(!objectListing.isTruncated) return
+      objectListing = s3.listNextBatchOfObjects(objectListing)
+    }
+  }
 }
