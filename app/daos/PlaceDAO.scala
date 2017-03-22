@@ -49,7 +49,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
-        base64Encoder.encode(Files.toByteArray(picture.ref.file)), url))
+        base64Encoder.encode(Files.toByteArray(picture.ref.file)), filenameOnS3, url))
     } yield writeResult
   }
 
@@ -60,11 +60,14 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
 
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture)), url))
+      writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture)), filenameOnS3, url))
     } yield writeResult
   }
 
-  def drop() = placesCollection.map(_.drop(failIfNotFound = true))
+  def drop() = {
+    s3DAO.emptyBucket()
+    placesCollection.map(_.drop(failIfNotFound = true))
+  }
 
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
@@ -78,6 +81,11 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
 
   def remove(id: Int): Future[Boolean] = {
+    // TODO refactor this - this is for deleting the image on S3
+    for (placeToDelete <- findById(id)) s3DAO.deleteFile(placeToDelete.get.url)
+
+
+
     for {
       placeToDelete <- findById(id)
       if placeToDelete.isDefined
@@ -95,7 +103,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
       places <- placesCollection
       placeOpt <- findById(id)
       picture = if(pictureOpt.get.filename != "") base64Encoder.encode(Files.toByteArray(pictureOpt.get.ref.file)) else placeOpt.get.picture
-      updateWriteResult <- places.update(Json.obj("id" -> id), Place(id, placeData.name, placeData.country, placeData.description, picture, key))
+      updateWriteResult <- places.update(Json.obj("id" -> id), Place(id, placeData.name, placeData.country, placeData.description, picture, key, key))
     } yield updateWriteResult
   }
 }
