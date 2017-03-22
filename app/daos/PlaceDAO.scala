@@ -42,7 +42,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
     val filenameOnS3 = s"${placeData.name.toLowerCase.replace(" ", "-")}-${UUID.randomUUID().toString}.jpg"
 
     // TODO refactor this - remove use of Option.get
-    val url = s3DAO.uploadFile(pictureOpt.get.ref.file, filenameOnS3)   //s"${placeData.name}-${UUID.randomUUID().toString}.jpg"
+    val url = s3DAO.uploadFile(pictureOpt.get.ref.file, filenameOnS3)
 
     // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     val picture = pictureOpt.get
@@ -82,9 +82,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
 
   def remove(id: Int): Future[Boolean] = {
     // TODO refactor this - this is for deleting the image on S3
-    for (placeToDelete <- findById(id)) s3DAO.deleteFile(placeToDelete.get.url)
-
-
+    for (placeToDelete <- findById(id)) s3DAO.deleteFile(placeToDelete.get.key)
 
     for {
       placeToDelete <- findById(id)
