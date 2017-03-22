@@ -6,6 +6,7 @@ import javax.inject.Inject
 
 import com.google.common.io.Files
 import models._
+import play.api.Configuration
 import play.api.data.Forms._
 import play.api.data._
 import play.api.libs.Files.TemporaryFile
@@ -25,11 +26,11 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * PlaceDAO - acts as a DAO to instances of the Place class that are stored in the database.
   */
-class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
+class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configuration)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
 
   private val base64Encoder = new BASE64Encoder()
-  private val s3DAO = new S3DAO("muhsinali-picture-gallery")
+  private val s3DAO = new S3DAO(config.underlying.getString("aws-s3-bucket-name"))
 
   // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
   private def placesCollection: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
@@ -101,7 +102,8 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
       places <- placesCollection
       placeOpt <- findById(id)
       picture = if(pictureOpt.get.filename != "") base64Encoder.encode(Files.toByteArray(pictureOpt.get.ref.file)) else placeOpt.get.picture
-      updateWriteResult <- places.update(Json.obj("id" -> id), Place(id, placeData.name, placeData.country, placeData.description, picture, key, key))
+      updateWriteResult <- places.update(Json.obj("id" -> id),
+        Place(id, placeData.name, placeData.country, placeData.description, picture, key, key))
     } yield updateWriteResult
   }
 }

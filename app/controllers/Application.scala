@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import daos.PlaceDAO
 import models.{Place, PlaceData}
+import play.api.Configuration
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.ApplicationLifecycle
@@ -18,12 +19,13 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * Application is the entry point of this web application and handles all HTTP requests for this web application.
   */
-class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, applicationLifecycle: ApplicationLifecycle)
+class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi,
+                            applicationLifecycle: ApplicationLifecycle, config: Configuration)
                            (implicit ec: ExecutionContext)
   extends Controller with MongoController with ReactiveMongoComponents with I18nSupport {
 
   implicit val formatter = Json.format[Place]
-  val placeDAO = new PlaceDAO(reactiveMongoApi)
+  val placeDAO = new PlaceDAO(reactiveMongoApi, config)
 
 
   // TODO get the flash scope to work
