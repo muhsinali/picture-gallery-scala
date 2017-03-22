@@ -38,25 +38,29 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
 
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
-    val key = UUID.randomUUID().toString
-    // TODO use s3DAO here
+
+    val filenameOnS3 = s"${placeData.name.toLowerCase.replace(" ", "-")}-${UUID.randomUUID().toString}.jpg"
+
+    // TODO refactor this - remove use of Option.get
+    val url = s3DAO.uploadFile(pictureOpt.get.ref.file, filenameOnS3)   //s"${placeData.name}-${UUID.randomUUID().toString}.jpg"
+
     // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     val picture = pictureOpt.get
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
-        base64Encoder.encode(Files.toByteArray(picture.ref.file)), key))
+        base64Encoder.encode(Files.toByteArray(picture.ref.file)), url))
     } yield writeResult
   }
 
   // Used to create instances of the Place class from JSON files at application startup
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
-    val key = UUID.randomUUID().toString
-    // TODO use s3DAO here
+    val filenameOnS3 = s"${name.toLowerCase.replace(" ", "-")}-${UUID.randomUUID().toString}.jpg"
+    val url = s3DAO.uploadFile(picture, filenameOnS3)
 
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture)), key))
+      writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture)), url))
     } yield writeResult
   }
 
@@ -83,9 +87,8 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
   }
 
   def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
+    // TODO Must replace old picture with new one and pass in the url into places.update() below
     val key = UUID.randomUUID().toString
-    // TODO use s3DAO here
-
 
     val id = placeData.id.get   // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     for {

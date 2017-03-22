@@ -57,9 +57,6 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, env:
       val key = java.util.UUID.randomUUID().toString
       source.close()
       placeDAO.create(id, name, country, description, picture)
-
-      // TODO remove this once use of S3DAO is complete
-      //s3.uploadFile(picture, s"name-$key.jpg")
     }
   }
 
