@@ -3,7 +3,7 @@ package services
 import java.io.File
 import javax.inject.{Inject, Singleton}
 
-import daos.{PlaceDAO, S3DAO}
+import daos.PlaceDAO
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Configuration, Logger}
@@ -43,7 +43,6 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, conf
     Logger.info("Populating database with tasks on startup")
 
     // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
-    val s3 = new S3DAO("muhsinali-picture-gallery")
     val jsonFiles = getListOfFiles("public/jsonFiles")
     for(f <- jsonFiles) {
       val source = Source.fromFile(f)
@@ -53,7 +52,6 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, conf
       val country = getJsonProperty(parsedJson, "country")
       val description = getJsonProperty(parsedJson, "description")
       val picture = new File(getJsonProperty(parsedJson, "picture"))
-      val key = java.util.UUID.randomUUID().toString
       source.close()
       placeDAO.create(id, name, country, description, picture)
     }

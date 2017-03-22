@@ -112,7 +112,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
 
 object PlaceDAO {
-  /* STOPSHIP
+  /*
    NOTE:
    The method used here to generate IDs is not the best. Could use a GUID (e.g. one generated using the
    BSONObjectID.generate method) but then this would make the URL harder to read. So for the time being generate a simple

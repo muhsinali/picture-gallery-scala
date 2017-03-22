@@ -1,6 +1,6 @@
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 /**
   * PlaceData
@@ -19,5 +19,5 @@ case class Place (id: Int, name: String, country: String, description: String, p
 }
 
 object Place {
-  implicit val formatter = Json.format[Place]
+  implicit val formatter: OFormat[Place] = Json.format[Place]
 }
