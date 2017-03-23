@@ -5,13 +5,13 @@ import java.util.UUID
 import javax.inject.Inject
 
 import models._
-import play.api.Configuration
 import play.api.data.Forms._
 import play.api.data._
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Controller
 import play.api.mvc.MultipartFormData.FilePart
+import play.api.{Configuration, Logger}
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
@@ -19,6 +19,7 @@ import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 
 /**
@@ -36,11 +37,8 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
     val filenameForS3 = generateFilenameForS3(placeData.name)
-
-    // TODO refactor this - remove use of Option.get
     val url = s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3)
 
-    // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
@@ -52,7 +50,6 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
     val filenameForS3 = generateFilenameForS3(name)
     val url = s3DAO.uploadFile(picture, filenameForS3)
-
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(id, name, country, description, filenameForS3, url))
@@ -76,33 +73,35 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
 
   def remove(id: Int): Future[Boolean] = {
-    // TODO refactor this - this is for deleting the image on S3
-    for (placeToDelete <- findById(id)) s3DAO.deleteFile(placeToDelete.get.key)
+    findById(id).onComplete{
+      case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get.key)
+      case Failure(_) => Logger.error("Error in PlaceDAO.remove() - Place could not be located in database")
+    }
 
     for {
       placeToDelete <- findById(id)
-      if placeToDelete.isDefined
       places <- placesCollection
       writeResult <- places.remove[Place](placeToDelete.get, firstMatchOnly = true)
     } yield writeResult.ok
   }
 
-  // TODO refactor this
-  def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
-    val id = placeData.id.get   // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
 
-    // Delete old image on S3 if new one has been provided by the user
-    if(pictureOpt.get.filename != ""){
-      for(placeOpt <- findById(id)){
-        s3DAO.deleteFile(placeOpt.get.key)
+  def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
+    val id = placeData.id.get
+    val didUserUploadNewImage = pictureOpt.get.filename != ""
+
+    if(didUserUploadNewImage){
+      findById(id).onComplete{
+        case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get.key)
+        case Failure(_) => Logger.error("Error in PlaceDAO.update() - Place could not be located in database")
       }
     }
 
     for {
       places <- placesCollection
       placeOpt <- findById(id)
-      filenameForS3 = if(pictureOpt.get.filename != "") generateFilenameForS3(placeData.name) else placeOpt.get.key
-      url = if(pictureOpt.get.filename != "") s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3) else placeOpt.get.url
+      filenameForS3 = if(didUserUploadNewImage) generateFilenameForS3(placeData.name) else placeOpt.get.key
+      url = if(didUserUploadNewImage) s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3) else placeOpt.get.url
       updateWriteResult <- places.update(Json.obj("id" -> id), new Place(placeData, filenameForS3, url))
     } yield updateWriteResult
   }
