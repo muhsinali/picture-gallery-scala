@@ -31,30 +31,27 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
   private def placesCollection: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
   private val s3DAO = new S3DAO(config.underlying.getString("aws-s3-bucket-name"))
-  private def generateFilenameForS3(name: String, uuid: UUID): String = s"${name.toLowerCase.replace(" ", "-")}-${uuid.toString}.jpg"
 
 
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
     val uuid = UUID.randomUUID()
-    val filenameForS3 = generateFilenameForS3(placeData.name, uuid)
-    val url = s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3)
+    s3DAO.uploadFile(placeData.name, uuid, pictureOpt.get.ref.file)
 
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
-        filenameForS3, url, s3DAO.urlPrefix, uuid.toString))
+        s3DAO.urlPrefix, uuid.toString))
     } yield writeResult
   }
 
   // Used to create instances of the Place class from JSON files at application startup
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
     val uuid = UUID.randomUUID()
-    val filenameForS3 = generateFilenameForS3(name, uuid)
-    val url = s3DAO.uploadFile(picture, filenameForS3)
+    s3DAO.uploadFile(name, uuid, picture)
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(id, name, country, description, filenameForS3, url, s3DAO.urlPrefix, uuid.toString))
+      writeResult <- places.insert(Place(id, name, country, description, s3DAO.urlPrefix, uuid.toString))
     } yield writeResult
   }
 
@@ -76,7 +73,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
   def remove(id: Int): Future[Boolean] = {
     findById(id).onComplete{
-      case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get.key)
+      case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get)
       case Failure(_) => Logger.error("Error in PlaceDAO.remove() - Place could not be located in database")
     }
 
@@ -94,7 +91,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
     if(didUserUploadNewImage){
       findById(id).onComplete{
-        case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get.key)
+        case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get)
         case Failure(_) => Logger.error("Error in PlaceDAO.update() - Place could not be located in database")
       }
     }
@@ -103,10 +100,8 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
     for {
       places <- placesCollection
       placeOpt <- findById(id)
-      filenameForS3 = if(didUserUploadNewImage) generateFilenameForS3(placeData.name, uuid) else placeOpt.get.key
-      url = if(didUserUploadNewImage) s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3) else placeOpt.get.url
       updateWriteResult <- places.update(Json.obj("id" -> id),
-        new Place(placeData, filenameForS3, url, s3DAO.urlPrefix, uuid.toString))
+        new Place(placeData, s3DAO.urlPrefix, uuid.toString))
     } yield updateWriteResult
   }
 }
