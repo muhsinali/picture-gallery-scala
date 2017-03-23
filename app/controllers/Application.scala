@@ -58,7 +58,9 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def showListView: Action[AnyContent] = Action.async {implicit request => placeDAO.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))}
+  def showListView: Action[AnyContent] = Action.async {implicit request =>
+    placeDAO.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))
+  }
 
 
   // TODO get flash scope to work
@@ -90,7 +92,8 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
       writeResultFuture.map {
         case w: UpdateWriteResult =>
-          val flashMessage = if (w.ok) "success" -> "Successfully edited place" else "error" -> s"Could not edit place with id ${placeData.id.get}"
+          val flashMessage = if (w.ok) "success" -> "Successfully edited place"
+            else "error" -> s"Could not edit place with id ${placeData.id.get}"
           Redirect(routes.Application.showGridView()).flashing(flashMessage)
         case w: WriteResult =>
           val flashMessage = if (w.ok) "success" -> "Successfully added place" else "error" -> "Could not add place to database"
