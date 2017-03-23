@@ -15,11 +15,15 @@ class S3DAO(val bucketName: String) {
       .withRegion(Regions.EU_WEST_2).build()
 
 
+  val urlPrefix: String = s"https://$bucketName.s3.amazonaws.com"
+
+  // TODO also upload grid and thumbnail sized images
   def uploadFile(file: File, key: String): String = {
     s3.putObject(new PutObjectRequest(bucketName, key, file).withCannedAcl(CannedAccessControlList.PublicReadWrite))
     s3.getUrl(bucketName, key).toString
   }
 
+  // TODO also delete grid and thumbnail sized images
   def deleteFile(key: String): Unit = {
     s3.deleteObject(bucketName, key)
   }

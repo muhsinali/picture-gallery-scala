@@ -14,10 +14,20 @@ case class PlaceData(id: Option[Int], name: String, country: String, description
 /**
   * Place - a point of interest that the user would like to store in the database.
   */
-case class Place (id: Int, name: String, country: String, description: String, key: String, url: String) {
-  def this(pd: PlaceData, key: String, url: String){
-    this(pd.id.get, pd.name, pd.country, pd.description, key: String, url: String)
+case class Place (id: Int, name: String, country: String, description: String, key: String, url: String, urlPrefix: String, s3Uuid: String) {
+  def this(pd: PlaceData, key: String, url: String, urlPrefix: String, uuid: String){
+    this(pd.id.get, pd.name, pd.country, pd.description, key: String, url: String, urlPrefix, uuid)
   }
+
+
+  // TODO remove key and url fields once ready
+  val gridThumbnailKey: String = s"${name.toLowerCase.replace(" ", "-")}-grid-thumbnail-$s3Uuid.jpg"
+  val listThumbnailKey: String = s"${name.toLowerCase.replace(" ", "-")}-list-thumbnail-$s3Uuid.jpg"
+  val pictureKey: String = s"${name.toLowerCase.replace(" ", "-")}-$s3Uuid.jpg"
+
+  val gridThumbnailUrl: String = s"$urlPrefix/$gridThumbnailKey"
+  val listThumbnailUrl: String = s"$urlPrefix/$listThumbnailKey"
+  val pictureUrl: String = s"$urlPrefix/$pictureKey"
 
   override def toString: String = id.toString
 }

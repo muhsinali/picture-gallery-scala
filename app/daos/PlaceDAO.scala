@@ -31,28 +31,30 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
   private def placesCollection: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
   private val s3DAO = new S3DAO(config.underlying.getString("aws-s3-bucket-name"))
-  private def generateFilenameForS3(name: String): String = s"${name.toLowerCase.replace(" ", "-")}-${UUID.randomUUID().toString}.jpg"
+  private def generateFilenameForS3(name: String, uuid: UUID): String = s"${name.toLowerCase.replace(" ", "-")}-${uuid.toString}.jpg"
 
 
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
-    val filenameForS3 = generateFilenameForS3(placeData.name)
+    val uuid = UUID.randomUUID()
+    val filenameForS3 = generateFilenameForS3(placeData.name, uuid)
     val url = s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3)
 
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
-        filenameForS3, url))
+        filenameForS3, url, s3DAO.urlPrefix, uuid.toString))
     } yield writeResult
   }
 
   // Used to create instances of the Place class from JSON files at application startup
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
-    val filenameForS3 = generateFilenameForS3(name)
+    val uuid = UUID.randomUUID()
+    val filenameForS3 = generateFilenameForS3(name, uuid)
     val url = s3DAO.uploadFile(picture, filenameForS3)
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(id, name, country, description, filenameForS3, url))
+      writeResult <- places.insert(Place(id, name, country, description, filenameForS3, url, s3DAO.urlPrefix, uuid.toString))
     } yield writeResult
   }
 
@@ -97,12 +99,14 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
       }
     }
 
+    val uuid = UUID.randomUUID()
     for {
       places <- placesCollection
       placeOpt <- findById(id)
-      filenameForS3 = if(didUserUploadNewImage) generateFilenameForS3(placeData.name) else placeOpt.get.key
+      filenameForS3 = if(didUserUploadNewImage) generateFilenameForS3(placeData.name, uuid) else placeOpt.get.key
       url = if(didUserUploadNewImage) s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3) else placeOpt.get.url
-      updateWriteResult <- places.update(Json.obj("id" -> id), new Place(placeData, filenameForS3, url))
+      updateWriteResult <- places.update(Json.obj("id" -> id),
+        new Place(placeData, filenameForS3, url, s3DAO.urlPrefix, uuid.toString))
     } yield updateWriteResult
   }
 }
