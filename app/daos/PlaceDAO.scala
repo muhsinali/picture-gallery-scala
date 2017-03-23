@@ -35,7 +35,6 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
-    //s"${placeData.name.toLowerCase.replace(" ", "-")}-${UUID.randomUUID().toString}.jpg"
     val filenameForS3 = generateFilenameForS3(placeData.name)
 
     // TODO refactor this - remove use of Option.get
@@ -104,8 +103,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
       placeOpt <- findById(id)
       filenameForS3 = if(pictureOpt.get.filename != "") generateFilenameForS3(placeData.name) else placeOpt.get.key
       url = if(pictureOpt.get.filename != "") s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3) else placeOpt.get.url
-      updateWriteResult <- places.update(Json.obj("id" -> id),
-        Place(id, placeData.name, placeData.country, placeData.description, filenameForS3, url))
+      updateWriteResult <- places.update(Json.obj("id" -> id), new Place(placeData, filenameForS3, url))
     } yield updateWriteResult
   }
 }

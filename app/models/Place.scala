@@ -15,6 +15,10 @@ case class PlaceData(id: Option[Int], name: String, country: String, description
   * Place - a point of interest that the user would like to store in the database.
   */
 case class Place (id: Int, name: String, country: String, description: String, key: String, url: String) {
+  def this(pd: PlaceData, key: String, url: String){
+    this(pd.id.get, pd.name, pd.country, pd.description, key: String, url: String)
+  }
+
   override def toString: String = id.toString
 }
 

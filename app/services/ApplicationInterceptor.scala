@@ -42,7 +42,6 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, conf
 
     Logger.info("Populating database with tasks on startup")
 
-    // TODO might be handy to use parsedJson.as[Place] here - but Place.picture is of type Array[Byte]
     val jsonFiles = getListOfFiles("public/jsonFiles")
     for(f <- jsonFiles) {
       val source = Source.fromFile(f)
