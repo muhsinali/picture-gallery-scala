@@ -4,7 +4,6 @@ import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 
-import com.google.common.io.Files
 import models._
 import play.api.Configuration
 import play.api.data.Forms._
@@ -18,7 +17,6 @@ import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMo
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.play.json.collection.JSONCollection
-import sun.misc.BASE64Encoder
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,8 +28,6 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
   with MongoController with ReactiveMongoComponents {
   // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
   private def placesCollection: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
-
-  private val base64Encoder = new BASE64Encoder()
 
   private val s3DAO = new S3DAO(config.underlying.getString("aws-s3-bucket-name"))
   private def generateFilenameForS3(name: String): String = s"${name.toLowerCase.replace(" ", "-")}-${UUID.randomUUID().toString}.jpg"
@@ -46,11 +42,10 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
     val url = s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3)
 
     // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
-    val picture = pictureOpt.get
     for {
       places <- placesCollection
       writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
-        base64Encoder.encode(Files.toByteArray(picture.ref.file)), filenameForS3, url))
+        filenameForS3, url))
     } yield writeResult
   }
 
@@ -61,7 +56,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture)), filenameForS3, url))
+      writeResult <- places.insert(Place(id, name, country, description, filenameForS3, url))
     } yield writeResult
   }
 
@@ -107,11 +102,10 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
     for {
       places <- placesCollection
       placeOpt <- findById(id)
-      picture = if(pictureOpt.get.filename != "") base64Encoder.encode(Files.toByteArray(pictureOpt.get.ref.file)) else placeOpt.get.picture
       filenameForS3 = if(pictureOpt.get.filename != "") generateFilenameForS3(placeData.name) else placeOpt.get.key
       url = if(pictureOpt.get.filename != "") s3DAO.uploadFile(pictureOpt.get.ref.file, filenameForS3) else placeOpt.get.url
       updateWriteResult <- places.update(Json.obj("id" -> id),
-        Place(id, placeData.name, placeData.country, placeData.description, picture, filenameForS3, url))
+        Place(id, placeData.name, placeData.country, placeData.description, filenameForS3, url))
     } yield updateWriteResult
   }
 }
