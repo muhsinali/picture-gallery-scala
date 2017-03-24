@@ -18,7 +18,7 @@ class S3DAO(val bucketName: String) {
       .withRegion(Regions.EU_WEST_2)
       .build()
 
-  // Uploads all images relevant to place object
+  // Uploads all images relevant to Place object
   def uploadImages(place: Place, imageToUpload: File): Unit = {
     // Generates thumbnails and uploads them to S3 bucket
     def uploadThumbnail(thumbnailKey: String, width: Int, height: Int): Unit = {
@@ -37,9 +37,11 @@ class S3DAO(val bucketName: String) {
   }
 
 
-  def deleteFile(place: Place): Unit = s3.deleteObjects(new DeleteObjectsRequest(bucketName)
+  def deleteImages(place: Place): Unit = s3.deleteObjects(new DeleteObjectsRequest(bucketName)
       .withKeys(place.pictureKey, place.gridThumbnailKey, place.listThumbnailKey))
 
+
+  def getImage(key: String): S3Object = s3.getObject(bucketName, key)
 
   // Deletes all objects in bucket (note: the bucket itself isn't deleted)
   def emptyBucket(): Unit = {

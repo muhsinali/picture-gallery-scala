@@ -1,10 +1,11 @@
 package daos
 
-import java.io.File
+import java.io._
 import java.util.UUID
 import javax.inject.Inject
 
 import models._
+import org.apache.commons.io.IOUtils
 import play.api.data.Forms._
 import play.api.data._
 import play.api.libs.Files.TemporaryFile
@@ -74,7 +75,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
   def remove(id: Int): Future[Boolean] = {
     findById(id).onComplete{
-      case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get)
+      case Success(placeToDelete) => s3DAO.deleteImages(placeToDelete.get)
       case Failure(_) => Logger.error("Error in PlaceDAO.remove() - Place could not be located in database")
     }
 
@@ -88,21 +89,45 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
   def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
     val id = placeData.id.get
-    val didUserUploadNewImage = pictureOpt.get.filename != ""
+    val didUserUploadNewPicture = pictureOpt.get.filename != ""
 
-    if(didUserUploadNewImage){
+    if(didUserUploadNewPicture){
       findById(id).onComplete{
-        case Success(placeToDelete) => s3DAO.deleteFile(placeToDelete.get)
+        case Success(placeToDelete) => s3DAO.deleteImages(placeToDelete.get)
         case Failure(_) => Logger.error("Error in PlaceDAO.update() - Place could not be located in database")
+      }
+
+      return placesCollection.flatMap {places =>
+        val place = new Place(placeData, s3BucketName, UUID.randomUUID())
+        s3DAO.uploadImages(place, pictureOpt.get.ref.file)
+        places.update(Json.obj("id" -> id), place)
       }
     }
 
-    val uuid = UUID.randomUUID()
+    // When the user didn't update the picture
     for {
       places <- placesCollection
-      placeOpt <- findById(id)
-      updateWriteResult <- places.update(Json.obj("id" -> id), new Place(placeData, s3BucketName, uuid))
-    } yield updateWriteResult
+      oldPlace <- findById(id)
+    } {
+
+      val place = Place(id, placeData.name, placeData.country, placeData.description, s3BucketName, UUID.randomUUID())
+
+      // If the picture is not updated, retrieve it from the bucket...
+      val picture: InputStream = s3DAO.getImage(oldPlace.get.pictureKey).getObjectContent
+      val tempFile = File.createTempFile(place.name, ".tmp")
+      tempFile.deleteOnExit()
+      val out = new FileOutputStream(tempFile)
+      IOUtils.copy(picture, out)
+      picture.close()
+      out.close()
+
+      // ...then delete it and upload it again under the new filename
+      s3DAO.deleteImages(oldPlace.get)
+      s3DAO.uploadImages(place, tempFile)
+
+      places.update(Json.obj("id" -> id), place)
+    }
+    Future(UpdateWriteResult(ok = true, 1, 1, Nil, Nil, None, None, None))
   }
 }
 
