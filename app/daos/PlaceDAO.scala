@@ -35,23 +35,23 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
-    val uuid = UUID.randomUUID()
-    s3DAO.uploadFile(placeData.name, uuid, pictureOpt.get.ref.file)
+    val place = Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
+      s3DAO.urlPrefix, UUID.randomUUID().toString)
 
+    s3DAO.uploadImages(place, pictureOpt.get.ref.file)
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
-        s3DAO.urlPrefix, uuid.toString))
+      writeResult <- places.insert(place)
     } yield writeResult
   }
 
   // Used to create instances of the Place class from JSON files at application startup
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
-    val uuid = UUID.randomUUID()
-    s3DAO.uploadFile(name, uuid, picture)
+    val place = Place(id, name, country, description, s3DAO.urlPrefix, UUID.randomUUID().toString)
+    s3DAO.uploadImages(place, picture)
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(id, name, country, description, s3DAO.urlPrefix, uuid.toString))
+      writeResult <- places.insert(place)
     } yield writeResult
   }
 
@@ -100,8 +100,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
     for {
       places <- placesCollection
       placeOpt <- findById(id)
-      updateWriteResult <- places.update(Json.obj("id" -> id),
-        new Place(placeData, s3DAO.urlPrefix, uuid.toString))
+      updateWriteResult <- places.update(Json.obj("id" -> id), new Place(placeData, s3DAO.urlPrefix, uuid.toString))
     } yield updateWriteResult
   }
 }

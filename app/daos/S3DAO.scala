@@ -1,7 +1,6 @@
 package daos
 
 import java.io.File
-import java.util.UUID
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.regions.Regions
@@ -20,31 +19,22 @@ class S3DAO(val bucketName: String) {
 
   val urlPrefix = s"https://$bucketName.s3.amazonaws.com"
 
+  // Uploads all images relevant to place object
+  def uploadImages(place: Place, imageToUpload: File): Unit = {
+    // Generates thumbnails and uploads them to bucket
+    def uploadThumbnail(thumbnailKey: String, width: Int, height: Int): Unit = {
+      implicit val writer = JpegWriter(compression = 100, progressive = true)
+      val inputStream = Image.fromFile(imageToUpload).cover(width, height).stream
+      val metadata: ObjectMetadata = new ObjectMetadata()
+      metadata.setContentLength(inputStream.available())
+      s3.putObject(new PutObjectRequest(bucketName, thumbnailKey, inputStream, metadata)
+          .withCannedAcl(CannedAccessControlList.PublicReadWrite))
+    }
 
-
-  // TODO refactor this
-  // TODO ensure that your set the content length to ObjectMetadata
-  // TODO figure out how to speed this up - use Promises?
-  def uploadFile(name: String, uuid: UUID, file: File): Unit = {
-    val keyPrefix = name.toLowerCase.replace(" ", "-")
-    val key = s"$keyPrefix-${uuid.toString}.jpg"
-    s3.putObject(new PutObjectRequest(bucketName, key, file).withCannedAcl(CannedAccessControlList.PublicReadWrite))
-
-    implicit val writer = JpegWriter(compression = 100, progressive = true)
-
-    val gridThumbnailKey = s"$keyPrefix-grid-thumbnail-${uuid.toString}.jpg"
-    val gridThumbnailInputStream = Image.fromFile(file).cover(360, 240).stream
-    val metadata: ObjectMetadata = new ObjectMetadata()
-    //val length: Long = IOUtils.toByteArray(gridThumbnailInputStream).length
-    //metadata.setContentLength(length)
-    s3.putObject(new PutObjectRequest(bucketName, gridThumbnailKey, gridThumbnailInputStream, metadata)
+    uploadThumbnail(place.gridThumbnailKey, 360, 240)
+    uploadThumbnail(place.listThumbnailKey, 75, 50)
+    s3.putObject(new PutObjectRequest(bucketName, place.pictureKey, imageToUpload)
         .withCannedAcl(CannedAccessControlList.PublicReadWrite))
-
-    val listThumbnailKey = s"$keyPrefix-list-thumbnail-${uuid.toString}.jpg"
-    val listThumbnailInputStream = Image.fromFile(file).cover(75, 50).stream
-    s3.putObject(new PutObjectRequest(bucketName, listThumbnailKey, listThumbnailInputStream, new ObjectMetadata())
-        .withCannedAcl(CannedAccessControlList.PublicReadWrite))
-
   }
 
 
@@ -52,6 +42,7 @@ class S3DAO(val bucketName: String) {
       .withKeys(place.pictureKey, place.gridThumbnailKey, place.listThumbnailKey))
 
 
+  // Deletes all objects in bucket (the bucket itself isn't deleted)
   def emptyBucket(): Unit = {
     var objectListing = s3.listObjects(bucketName)
     while(true){
