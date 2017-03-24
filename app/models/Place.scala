@@ -38,6 +38,12 @@ case class Place (id: Int, name: String, country: String, description: String, s
   override def toString: String = id.toString
 }
 
+
+
 object Place {
   implicit val formatter: OFormat[Place] = Json.format[Place]
+
+  // Dimensions = (width, height)
+  val gridThumbnailDims: (Int, Int) = (360, 240)
+  val listThumbnailDims: (Int, Int) = (75, 50)
 }

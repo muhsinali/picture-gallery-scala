@@ -20,6 +20,7 @@ class S3DAO(val bucketName: String) {
 
   // Uploads all images relevant to Place object
   def uploadImages(place: Place, imageToUpload: File): Unit = {
+
     // Generates thumbnails and uploads them to S3 bucket
     def uploadThumbnail(thumbnailKey: String, width: Int, height: Int): Unit = {
       implicit val writer = JpegWriter(compression = 100, progressive = true)
@@ -30,8 +31,8 @@ class S3DAO(val bucketName: String) {
           .withCannedAcl(CannedAccessControlList.PublicReadWrite))
     }
 
-    uploadThumbnail(place.gridThumbnailKey, 360, 240)
-    uploadThumbnail(place.listThumbnailKey, 75, 50)
+    uploadThumbnail(place.gridThumbnailKey, Place.gridThumbnailDims._1, Place.gridThumbnailDims._2)
+    uploadThumbnail(place.listThumbnailKey, Place.listThumbnailDims._1, Place.listThumbnailDims._2)
     s3.putObject(new PutObjectRequest(bucketName, place.pictureKey, imageToUpload)
         .withCannedAcl(CannedAccessControlList.PublicReadWrite))
   }
