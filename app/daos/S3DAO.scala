@@ -15,15 +15,16 @@ import scala.collection.JavaConverters._
 class S3DAO(val bucketName: String) {
   private val s3: AmazonS3 = AmazonS3ClientBuilder.standard()
       .withCredentials(new DefaultAWSCredentialsProviderChain())
-      .withRegion(Regions.EU_WEST_2).build()
+      .withRegion(Regions.EU_WEST_2)
+      .build()
 
   // Uploads all images relevant to place object
   def uploadImages(place: Place, imageToUpload: File): Unit = {
-    // Generates thumbnails and uploads them to bucket
+    // Generates thumbnails and uploads them to S3 bucket
     def uploadThumbnail(thumbnailKey: String, width: Int, height: Int): Unit = {
       implicit val writer = JpegWriter(compression = 100, progressive = true)
       val inputStream = Image.fromFile(imageToUpload).cover(width, height).stream
-      val metadata: ObjectMetadata = new ObjectMetadata()
+      val metadata = new ObjectMetadata()
       metadata.setContentLength(inputStream.available())
       s3.putObject(new PutObjectRequest(bucketName, thumbnailKey, inputStream, metadata)
           .withCannedAcl(CannedAccessControlList.PublicReadWrite))
@@ -40,7 +41,7 @@ class S3DAO(val bucketName: String) {
       .withKeys(place.pictureKey, place.gridThumbnailKey, place.listThumbnailKey))
 
 
-  // Deletes all objects in bucket (the bucket itself isn't deleted)
+  // Deletes all objects in bucket (note: the bucket itself isn't deleted)
   def emptyBucket(): Unit = {
     var objectListing = s3.listObjects(bucketName)
     while(true){

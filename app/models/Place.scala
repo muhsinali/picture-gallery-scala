@@ -14,8 +14,8 @@ case class PlaceData(id: Option[Int], name: String, country: String, description
 /**
   * Place - a point of interest that the user would like to store in the database.
   *
-  * s3BucketName   url of the bucket that contains the images for this Place object
-  * s3Uuid      the guid used in the filenames of the images for this Place in the relevant S3 bucket
+  * s3BucketName    the AWS S3 bucket that contains the images for this Place object
+  * s3Uuid          the UUID used in the filenames of the images for this Place in the relevant S3 bucket
   */
 case class Place (id: Int, name: String, country: String, description: String, s3BucketName: String, s3Uuid: String) {
   val urlPrefix: String = s"https://$s3BucketName.s3.amazonaws.com"
