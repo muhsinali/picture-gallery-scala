@@ -17,8 +17,6 @@ class S3DAO(val bucketName: String) {
       .withCredentials(new DefaultAWSCredentialsProviderChain())
       .withRegion(Regions.EU_WEST_2).build()
 
-  val urlPrefix = s"https://$bucketName.s3.amazonaws.com"
-
   // Uploads all images relevant to place object
   def uploadImages(place: Place, imageToUpload: File): Unit = {
     // Generates thumbnails and uploads them to bucket
