@@ -123,8 +123,8 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
       out.close()
 
       // ...then delete it from the bucket and upload it again under the new filename
-      oldPlace.foreach(s3DAO.deleteImages)
       s3DAO.uploadImages(place, tempFile)
+      oldPlace.foreach(s3DAO.deleteImages)
 
       places.update(Json.obj("id" -> id), place)
     }
