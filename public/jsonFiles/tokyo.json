@@ -2,5 +2,5 @@
   "name": "Tokyo",
   "country": "Japan",
   "description": "Tokyo, Japan’s bustling capital, mixes the ultramodern and the traditional, from neon-lit skyscrapers and anime shops to cherry trees and temples. The city is famed for its vibrant food scene and its trendy teen fashion scene.",
-  "picture": "./public/images/places/tokyo.jpg"
+  "picture": "tokyo.jpg"
 }

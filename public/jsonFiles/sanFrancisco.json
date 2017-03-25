@@ -2,5 +2,5 @@
   "name": "San Francisco",
   "country": "United States of America",
   "description": "San Francisco, in northern California, is a city on the tip of a peninsula surrounded by the Pacific Ocean and San Francisco Bay. It is known for its hilly landscape, year-round fog, iconic Golden Gate Bridge.",
-  "picture": "./public/images/places/sanFrancisco.jpg"
+  "picture": "sanFrancisco.jpg"
 }

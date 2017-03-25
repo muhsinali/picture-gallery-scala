@@ -2,5 +2,5 @@
   "name": "Nerja",
   "country": "Spain",
   "description": "Nerja is a resort town along southern Spain’s Costa del Sol. Its seafront promenade, Balcón de Europa, tops a promontory with views of the Mediterranean and mountains. Below it lie sandy beaches and cliffside coves.",
-  "picture": "./public/images/places/nerja.jpg"
+  "picture": "nerja.jpg"
 }
