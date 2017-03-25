@@ -2,5 +2,5 @@
   "name": "Amsterdam",
   "country": "Netherlands",
   "description": "Amsterdam is the Netherlands’ capital, known for its artistic heritage, elaborate canal system and narrow houses with gabled facades, legacies of the city’s 17th-century Golden Age.",
-  "picture": "./public/images/places/amsterdam.jpg"
+  "picture": "amsterdam.jpg"
 }
