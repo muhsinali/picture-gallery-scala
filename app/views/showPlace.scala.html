@@ -22,11 +22,9 @@
     </div>
 
 
-    @if(place.picture != null){
-        <div id="right-div" class="pull-right">
-            <img src="data:image/jpg;base64,@place.picture" />
-        </div>
-    }
+    <div id="right-div" class="pull-right">
+        <img src="@place.pictureUrl" />
+    </div>
 </div>
 }
 

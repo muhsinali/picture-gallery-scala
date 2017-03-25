@@ -2,13 +2,15 @@ package controllers
 
 import javax.inject.Inject
 
-import dao.PlaceDAO
+import daos.PlaceDAO
 import models.{Place, PlaceData}
+import play.api.Configuration
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller}
+import play.api.libs.Files
+import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.{Action, AnyContent, Controller, MultipartFormData}
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 
@@ -18,36 +20,37 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * Application is the entry point of this web application and handles all HTTP requests for this web application.
   */
-class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, applicationLifecycle: ApplicationLifecycle)
+class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi,
+                            applicationLifecycle: ApplicationLifecycle, config: Configuration)
                            (implicit ec: ExecutionContext)
   extends Controller with MongoController with ReactiveMongoComponents with I18nSupport {
 
-  implicit val formatter = Json.format[Place]
-  val placeDAO = new PlaceDAO(reactiveMongoApi)
+  implicit val formatter: OFormat[Place] = Json.format[Place]
+  val placeDAO = new PlaceDAO(reactiveMongoApi, config)
 
 
   // TODO get the flash scope to work
-  def deletePlace(id: Int) = Action.async { implicit request =>
+  def deletePlace(id: Int): Action[AnyContent] = Action.async { implicit request =>
     placeDAO.remove(id).map {
       case true => Redirect(routes.Application.showGridView()).flashing("success" -> s"Deleted place with ID $id")
       case false => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not delete place with ID $id")
     }
   }
 
-  def editPlace(id: Int) = Action.async { implicit request =>
+  def editPlace(id: Int): Action[AnyContent] = Action.async { implicit request =>
     placeDAO.findById(id).map {
       case Some(placeFound) =>
         val placeData = PlaceData(Some(id), placeFound.name, placeFound.country, placeFound.description)
-        Ok(views.html.placeForm(PlaceDAO.createPlaceForm.fill(placeData), Some(placeFound.picture)))
+        Ok(views.html.placeForm(PlaceDAO.createPlaceForm.fill(placeData), Some(placeFound.pictureUrl)))
       case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Could not find place with ID $id")
     }
   }
 
-  def fileNotFound() = Action{implicit request => NotFound(views.html.notFound())}
+  def fileNotFound(): Action[AnyContent] = Action{implicit request => NotFound(views.html.notFound())}
 
-  def index() = Action{implicit request => Redirect(routes.Application.showGridView())}
+  def index(): Action[AnyContent] = Action{implicit request => Redirect(routes.Application.showGridView())}
 
-  def showGridView() = Action.async { implicit request =>
+  def showGridView(): Action[AnyContent] = Action.async { implicit request =>
     placeDAO.getAllPlaces.map(placesList => {
       val numColumns = 3
       val numRows = math.ceil(placesList.length / numColumns.toDouble).toInt
@@ -55,18 +58,20 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     })
   }
 
-  def showListView = Action.async {implicit request => placeDAO.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))}
+  def showListView: Action[AnyContent] = Action.async {implicit request =>
+    placeDAO.getAllPlaces.map(placesList => Ok(views.html.list(placesList)))
+  }
 
 
   // TODO get flash scope to work
-  def showPlace(id: Int) = Action.async { implicit request =>
+  def showPlace(id: Int): Action[AnyContent] = Action.async { implicit request =>
     placeDAO.findById(id).map {
       case Some(place) => Ok(views.html.showPlace(place))
       case None => Redirect(routes.Application.showGridView()).flashing("error" -> s"Cannot find place with id $id")
     }
   }
 
-  def showPlaceForm = Action {implicit request => Ok(views.html.placeForm(PlaceDAO.createPlaceForm, None))}
+  def showPlaceForm: Action[AnyContent] = Action {implicit request => Ok(views.html.placeForm(PlaceDAO.createPlaceForm, None))}
 
 
   // TODO find out how to make the picture a required field for a newly created Place
@@ -74,20 +79,21 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
     * Handles the form post. It either inserts a Place into the database or edits an existing Place depending on whether
     * the Place already has an ID (only existing Places have an ID).
     */
-  def uploadPlace() = Action.async(parse.multipartFormData) { implicit request =>
+  def uploadPlace(): Action[MultipartFormData[Files.TemporaryFile]] = Action.async(parse.multipartFormData) { implicit request =>
     def failure(formWithErrors: Form[PlaceData]) = {
       Future(BadRequest(views.html.placeForm(formWithErrors, None)))
     }
 
     def success(placeData: PlaceData) = {
       val writeResultFuture = placeData.id match {
-        case Some(id) => placeDAO.update(placeData, request.body.file("picture"))
+        case Some(_) => placeDAO.update(placeData, request.body.file("picture"))
         case None => placeDAO.create(placeData, request.body.file("picture"))
       }
 
       writeResultFuture.map {
         case w: UpdateWriteResult =>
-          val flashMessage = if (w.ok) "success" -> "Successfully edited place" else "error" -> s"Could not edit place with id ${placeData.id.get}"
+          val flashMessage = if (w.ok) "success" -> "Successfully edited place"
+            else "error" -> s"Could not edit place with id ${placeData.id.get}"
           Redirect(routes.Application.showGridView()).flashing(flashMessage)
         case w: WriteResult =>
           val flashMessage = if (w.ok) "success" -> "Successfully added place" else "error" -> "Could not add place to database"

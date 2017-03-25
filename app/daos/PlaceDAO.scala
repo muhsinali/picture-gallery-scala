@@ -1,59 +1,67 @@
-package dao
+package daos
 
-import java.io.File
+import java.io._
+import java.util.UUID
 import javax.inject.Inject
 
-import com.google.common.io.Files
 import models._
+import org.apache.commons.io.IOUtils
 import play.api.data.Forms._
 import play.api.data._
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Controller
 import play.api.mvc.MultipartFormData.FilePart
+import play.api.{Configuration, Logger}
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.play.json.collection.JSONCollection
-import sun.misc.BASE64Encoder
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 
 /**
-  * PlaceDAO - acts as a DAO to instances of the Place class that are stored in the database.
+  * PlaceDAO - acts as a DAO to instances of the Place class that are stored in the database (also contains a reference
+  *   an instance of S3DAO)
   */
-class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext) extends Controller
+class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configuration)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
-
-  private val base64Encoder = new BASE64Encoder()
-
   // Must be a 'def' and not a 'val' to prevent problems in development in Play with hot-reloading
   private def placesCollection: Future[JSONCollection] = database.map(_.collection[JSONCollection]("places"))
 
+  private val s3BucketName = config.underlying.getString("aws-s3-bucket-name")
+  private val s3DAO = new S3DAO(s3BucketName)
 
 
   // Used to create Place objects from a form submitted by the user
   def create(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[WriteResult] = {
-    // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
-    val picture = pictureOpt.get
+    val place = Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
+      s3BucketName, UUID.randomUUID())
+
+    pictureOpt.foreach(picture => s3DAO.uploadImages(place, picture.ref.file))
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
-        base64Encoder.encode(Files.toByteArray(picture.ref.file))))
+      writeResult <- places.insert(place)
     } yield writeResult
   }
 
   // Used to create instances of the Place class from JSON files at application startup
   def create(id: Int, name: String, country: String, description: String, picture: File): Future[WriteResult] = {
+    val place = Place(id, name, country, description, s3BucketName, UUID.randomUUID())
+    s3DAO.uploadImages(place, picture)
     for {
       places <- placesCollection
-      writeResult <- places.insert(Place(id, name, country, description, base64Encoder.encode(Files.toByteArray(picture))))
+      writeResult <- places.insert(place)
     } yield writeResult
   }
 
-  def drop() = placesCollection.map(_.drop(failIfNotFound = true))
+  def drop(): Future[Boolean] = {
+    s3DAO.emptyBucket()
+    placesCollection.flatMap(_.drop(failIfNotFound = true))
+  }
 
   def findById(id: Int): Future[Option[Place]] = findOne(Json.obj("id" -> id))
 
@@ -67,22 +75,60 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
   def getAllPlaces: Future[List[Place]] = findMany(Json.obj())
 
   def remove(id: Int): Future[Boolean] = {
+    findById(id).onComplete{
+      case Success(placeToDelete) => placeToDelete.foreach(s3DAO.deleteImages)
+      case Failure(_) => Logger.error("Error in PlaceDAO.remove() - Place could not be located in database")
+    }
+
     for {
       placeToDelete <- findById(id)
-      if placeToDelete.isDefined
       places <- placesCollection
       writeResult <- places.remove[Place](placeToDelete.get, firstMatchOnly = true)
     } yield writeResult.ok
   }
 
+
   def update(placeData: PlaceData, pictureOpt: Option[FilePart[TemporaryFile]]): Future[UpdateWriteResult] = {
-    val id = placeData.id.get   // IntelliJ complains of a type mismatch at compile-time if I place it in the for-comprehension below
+    val id = placeData.id.get
+    val didUserUploadNewPicture = pictureOpt.get.filename != ""
+
+    if(didUserUploadNewPicture){
+      findById(id).onComplete{
+        case Success(placeToDelete) => placeToDelete.foreach(s3DAO.deleteImages)
+        case Failure(_) => Logger.error("Error in PlaceDAO.update() - Place could not be located in database")
+      }
+
+      return placesCollection.flatMap {places =>
+        val place = new Place(placeData, s3BucketName, UUID.randomUUID())
+        pictureOpt.foreach(picture => s3DAO.uploadImages(place, picture.ref.file))
+        places.update(Json.obj("id" -> id), place)
+      }
+    }
+
+    // For the case when the user doesn't upload a new picture when editing the place
     for {
       places <- placesCollection
-      placeOpt <- findById(id)
-      picture = if(pictureOpt.get.filename != "") base64Encoder.encode(Files.toByteArray(pictureOpt.get.ref.file)) else placeOpt.get.picture
-      updateWriteResult <- places.update(Json.obj("id" -> id), Place(id, placeData.name, placeData.country, placeData.description, picture))
-    } yield updateWriteResult
+      oldPlace <- findById(id)
+    } {
+
+      val place = Place(id, placeData.name, placeData.country, placeData.description, s3BucketName, UUID.randomUUID())
+
+      // If the picture is not updated, retrieve it from the bucket...
+      val picture: InputStream = s3DAO.getImage(oldPlace.get.pictureKey).getObjectContent
+      val tempFile = File.createTempFile(place.name, ".tmp")
+      tempFile.deleteOnExit()
+      val out = new FileOutputStream(tempFile)
+      IOUtils.copy(picture, out)
+      picture.close()
+      out.close()
+
+      // ...then delete it from the bucket and upload it again under the new filename
+      oldPlace.foreach(s3DAO.deleteImages)
+      s3DAO.uploadImages(place, tempFile)
+
+      places.update(Json.obj("id" -> id), place)
+    }
+    Future(UpdateWriteResult(ok = true, 1, 1, Nil, Nil, None, None, None))
   }
 }
 
@@ -90,7 +136,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi)(implicit ec: Ex
 
 
 object PlaceDAO {
-  /* STOPSHIP
+  /*
    NOTE:
    The method used here to generate IDs is not the best. Could use a GUID (e.g. one generated using the
    BSONObjectID.generate method) but then this would make the URL harder to read. So for the time being generate a simple
