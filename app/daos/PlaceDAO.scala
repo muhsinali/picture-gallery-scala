@@ -24,7 +24,8 @@ import scala.util.{Failure, Success}
 
 
 /**
-  * PlaceDAO - acts as a DAO to instances of the Place class that are stored in the database.
+  * PlaceDAO - acts as a DAO to instances of the Place class that are stored in the database (also contains a reference
+  *   an instance of S3DAO)
   */
 class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configuration)(implicit ec: ExecutionContext) extends Controller
   with MongoController with ReactiveMongoComponents {
@@ -40,7 +41,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
     val place = Place(PlaceDAO.generateID, placeData.name, placeData.country, placeData.description,
       s3BucketName, UUID.randomUUID())
 
-    s3DAO.uploadImages(place, pictureOpt.get.ref.file)
+    pictureOpt.foreach(picture => s3DAO.uploadImages(place, picture.ref.file))
     for {
       places <- placesCollection
       writeResult <- places.insert(place)
@@ -75,7 +76,7 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
   def remove(id: Int): Future[Boolean] = {
     findById(id).onComplete{
-      case Success(placeToDelete) => s3DAO.deleteImages(placeToDelete.get)
+      case Success(placeToDelete) => placeToDelete.foreach(s3DAO.deleteImages)
       case Failure(_) => Logger.error("Error in PlaceDAO.remove() - Place could not be located in database")
     }
 
@@ -93,18 +94,18 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
 
     if(didUserUploadNewPicture){
       findById(id).onComplete{
-        case Success(placeToDelete) => s3DAO.deleteImages(placeToDelete.get)
+        case Success(placeToDelete) => placeToDelete.foreach(s3DAO.deleteImages)
         case Failure(_) => Logger.error("Error in PlaceDAO.update() - Place could not be located in database")
       }
 
       return placesCollection.flatMap {places =>
         val place = new Place(placeData, s3BucketName, UUID.randomUUID())
-        s3DAO.uploadImages(place, pictureOpt.get.ref.file)
+        pictureOpt.foreach(picture => s3DAO.uploadImages(place, picture.ref.file))
         places.update(Json.obj("id" -> id), place)
       }
     }
 
-    // When the user didn't update the picture
+    // For the case when the user doesn't upload a new picture when editing the place
     for {
       places <- placesCollection
       oldPlace <- findById(id)
@@ -121,8 +122,8 @@ class PlaceDAO @Inject()(val reactiveMongoApi: ReactiveMongoApi, config: Configu
       picture.close()
       out.close()
 
-      // ...then delete it and upload it again under the new filename
-      s3DAO.deleteImages(oldPlace.get)
+      // ...then delete it from the bucket and upload it again under the new filename
+      oldPlace.foreach(s3DAO.deleteImages)
       s3DAO.uploadImages(place, tempFile)
 
       places.update(Json.obj("id" -> id), place)

@@ -12,11 +12,17 @@ import models.Place
 
 import scala.collection.JavaConverters._
 
+
+/**
+  * S3DAO - the DAO for accessing images from an S3 bucket on AWS.
+  *
+  */
 class S3DAO(val bucketName: String) {
   private val s3: AmazonS3 = AmazonS3ClientBuilder.standard()
       .withCredentials(new DefaultAWSCredentialsProviderChain())
       .withRegion(Regions.EU_WEST_2)
       .build()
+
 
   // Uploads all images relevant to Place object
   def uploadImages(place: Place, imageToUpload: File): Unit = {
@@ -43,6 +49,7 @@ class S3DAO(val bucketName: String) {
 
 
   def getImage(key: String): S3Object = s3.getObject(bucketName, key)
+
 
   // Deletes all objects in bucket (note: the bucket itself isn't deleted)
   def emptyBucket(): Unit = {
