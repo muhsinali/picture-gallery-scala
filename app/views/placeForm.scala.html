@@ -12,15 +12,15 @@
         <fieldset>
             <legend>Add/edit a place</legend>
             <input type="hidden" value="@placeForm("id").value.getOrElse("")" name="id"/>
-            @inputText(placeForm("name"), '_label -> "Name", 'placeholder -> "London")
-            @inputText(placeForm("country"), '_label -> "Country", 'placeholder -> "United Kingdom")
-            @textarea(placeForm("description"), '_label -> "Description", 'placeholder -> "Type a description here")
+            @inputText(placeForm("name"), '_label -> "Name", '_showConstraints-> false, 'placeholder -> "London")
+            @inputText(placeForm("country"), '_label -> "Country", '_showConstraints-> false, 'placeholder -> "United Kingdom")
+            @textarea(placeForm("description"), '_label -> "Description", '_showConstraints-> false, 'placeholder -> "Type a description here")
             @inputFile(placeForm("picture"), '_label -> "Picture")
         </fieldset>
 
         <div class="pull-right">
             <input type="submit" class="btn btn-success" value="Save place">
-            @if(placeForm("id").value.isDefined){
+            @if(!placeForm("id").value.getOrElse("").isEmpty){
                 <a href="@routes.Application.showPlace(placeForm("id").value.get.toInt)" class="btn btn-default">Cancel</a>
             } else {
                 <a href="@routes.Application.showGridView()" class="btn btn-default">Cancel</a>

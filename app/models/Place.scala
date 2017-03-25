@@ -7,7 +7,7 @@ import play.api.libs.json.{Json, OFormat}
 /**
   * PlaceData
   * Used to gather information submitted in a form. This case class is used to decouple form submission and
-  * validation from the corresponding model class.
+  * validation from the Place model class.
   */
 case class PlaceData(id: Option[Int], name: String, country: String, description: String)
 
