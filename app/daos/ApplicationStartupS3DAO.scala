@@ -1,7 +1,7 @@
 package daos
 
 import java.io.{File, FileOutputStream, InputStream}
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.regions.Regions
@@ -11,6 +11,7 @@ import play.api.Configuration
 
 
 // Used simply to download the relevant images at application startup
+@Singleton
 class ApplicationStartupS3DAO @Inject()(config: Configuration) {
   private val s3: AmazonS3 = AmazonS3ClientBuilder.standard()
       .withCredentials(new DefaultAWSCredentialsProviderChain())
@@ -18,7 +19,7 @@ class ApplicationStartupS3DAO @Inject()(config: Configuration) {
       .build()
   private val bucketName = config.underlying.getString("aws-static-s3")
 
-  def downloadImageAsTempFile(key: String): File = {
+  def downloadImageToTempFile(key: String): File = {
     val inputStream: InputStream = s3.getObject(bucketName, key).getObjectContent
     val tempFile = File.createTempFile(s"temp-file-$key", ".tmp")
     tempFile.deleteOnExit()

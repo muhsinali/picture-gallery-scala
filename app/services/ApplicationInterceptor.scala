@@ -32,7 +32,7 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, conf
     def getListOfFiles(dirPath: String) = {
       val dir = new File(dirPath)
       if(dir.exists() && dir.isDirectory){
-        dir.listFiles.filter(f => f.isFile && f.getPath.endsWith(".json")).toList
+        dir.listFiles.filter(f => f.isFile && f.canRead && f.getPath.endsWith(".json")).toList
       } else {
         List[File]()
       }
@@ -51,7 +51,7 @@ class ApplicationInterceptor @Inject() (reactiveMongoApi: ReactiveMongoApi, conf
       val name = getJsonProperty(parsedJson, "name")
       val country = getJsonProperty(parsedJson, "country")
       val description = getJsonProperty(parsedJson, "description")
-      val picture = startupS3.downloadImageAsTempFile(getJsonProperty(parsedJson, "picture"))
+      val picture = startupS3.downloadImageToTempFile(getJsonProperty(parsedJson, "picture"))
       source.close()
       placeDAO.create(id, name, country, description, picture)
       picture.delete()
