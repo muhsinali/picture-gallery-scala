@@ -1,4 +1,4 @@
-Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-scala.svg?branch=master)](https://travis-ci.org/muhsinali/picture-gallery-scala) [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-scala.svg?branch=master)](https://travis-ci.org/muhsinali/picture-gallery-scala) [![Apache 2.0 License](https://img.shields.io/badge/license-Apache2-green.svg) ](https://github.com/muhsinali/picture-gallery-scala/blob/master/LICENSE) [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 =================================
 ![alt tag](public/images/pictureGallery.png)
 
