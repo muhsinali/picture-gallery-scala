@@ -10,7 +10,10 @@ import org.apache.commons.io.IOUtils
 import play.api.Configuration
 
 
-// Used simply to download the relevant images at application startup
+/*
+  Used simply to download the relevant images at application startup from the bucket that contains only static assets.
+  These are then uploaded to the main bucket.
+*/
 @Singleton
 class ApplicationStartupS3DAO @Inject()(config: Configuration) {
   private val s3: AmazonS3 = AmazonS3ClientBuilder.standard()
