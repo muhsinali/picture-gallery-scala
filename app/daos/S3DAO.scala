@@ -1,6 +1,8 @@
 package daos
 
 import java.io.File
+import java.sql.Date
+import java.time.LocalDate
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.regions.Regions
@@ -30,10 +32,10 @@ class S3DAO(val bucketName: String) {
 
     // Generates thumbnails and uploads them to S3 bucket
     def uploadThumbnail(thumbnailKey: String, width: Int, height: Int): Unit = {
-      //implicit val writer = JpegWriter.NoCompression.withProgressive(true)    //compression = 100, progressive = true)
       val inputStream = Image.fromFile(imageToUpload).cover(width, height).stream
       val metadata = new ObjectMetadata()
       metadata.setContentLength(inputStream.available())
+      metadata.setHttpExpiresDate(Date.valueOf(LocalDate.now().plusYears(1)))
       s3.putObject(new PutObjectRequest(bucketName, thumbnailKey, inputStream, metadata)
           .withCannedAcl(CannedAccessControlList.PublicReadWrite))
     }
@@ -44,6 +46,7 @@ class S3DAO(val bucketName: String) {
     val inputStream = Image.fromFile(imageToUpload).stream
     val metadata = new ObjectMetadata()
     metadata.setContentLength(inputStream.available())
+    metadata.setHttpExpiresDate(Date.valueOf(LocalDate.now().plusYears(1)))
     s3.putObject(new PutObjectRequest(bucketName, place.pictureKey, inputStream, metadata)
         .withCannedAcl(CannedAccessControlList.PublicReadWrite))
   }
