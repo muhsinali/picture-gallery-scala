@@ -35,7 +35,7 @@ class S3DAO(val bucketName: String) {
       val inputStream = Image.fromFile(imageToUpload).cover(width, height).stream
       val metadata = new ObjectMetadata()
       metadata.setContentLength(inputStream.available())
-      metadata.setHttpExpiresDate(Date.valueOf(LocalDate.now().plusYears(1)))
+      metadata.setCacheControl("max-age = 31536000")
       s3.putObject(new PutObjectRequest(bucketName, thumbnailKey, inputStream, metadata)
           .withCannedAcl(CannedAccessControlList.PublicReadWrite))
     }
@@ -46,7 +46,7 @@ class S3DAO(val bucketName: String) {
     val inputStream = Image.fromFile(imageToUpload).stream
     val metadata = new ObjectMetadata()
     metadata.setContentLength(inputStream.available())
-    metadata.setHttpExpiresDate(Date.valueOf(LocalDate.now().plusYears(1)))
+    metadata.setCacheControl("max-age = 31536000")
     s3.putObject(new PutObjectRequest(bucketName, place.pictureKey, inputStream, metadata)
         .withCannedAcl(CannedAccessControlList.PublicReadWrite))
   }
