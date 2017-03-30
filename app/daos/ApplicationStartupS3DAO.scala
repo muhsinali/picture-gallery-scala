@@ -20,7 +20,7 @@ class ApplicationStartupS3DAO @Inject()(config: Configuration) {
       .withCredentials(new DefaultAWSCredentialsProviderChain())
       .withRegion(Regions.EU_WEST_2)
       .build()
-  private val bucketName = config.underlying.getString("aws-static-s3")
+  private val bucketName = config.underlying.getString("s3-static")
 
   def downloadImageToTempFile(key: String): File = {
     val inputStream: InputStream = s3.getObject(bucketName, key).getObjectContent
