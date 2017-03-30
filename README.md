@@ -4,6 +4,8 @@ Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-sc
 
 ### [Try out project here](http://gallery.muhsinali.xyz)
 
+#### [WebPageTest performance results](https://www.webpagetest.org/result/170330_AK_1DN8/)
+
 This is a RESTful, CRUD web application that stores places of interest in a database and displays them either using a grid or a list layout back to the user.
 
 The user can add, edit or delete places from the database. It uses the [Play framework](https://www.playframework.com/) and the MVC pattern, and is currently configured to run locally on one's machine.
@@ -25,11 +27,11 @@ To run the web app locally, start the MongoDB database using `mongod` and then g
 Roadmap
 =================================
 - [ ] Optimise page load speeds:
-    - [X] Store images using Amazon S3
+    - [X] Store static assets using Amazon S3
     - [X] Use [Scrimage](https://github.com/sksamuel/scrimage) to dynamically generate thumbnails for every uploaded image (to reduce the size of the images used in the grid and list views)
     - [X] Use Scrimage to ensure all uploaded images are progressive JPEGs
-    - [X] Use Amazon CloudFront so that images are served from the closest edge location; reduces the latency of delivering images
-    - [X] Look for performance improvements using [WebPageTest](https://www.webpagetest.org/)
+    - [X] Use Amazon CloudFront so that static assets are served from the closest edge location; reduces the latency of delivering images
+    - [X] Look for performance improvements using [WebPageTest](https://www.webpagetest.org/) and implement them.
     - [ ] Add pagination to limit the number of images shown on the page
 - [ ] Add user authentication
 
