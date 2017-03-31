@@ -3,8 +3,7 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.Application.index
-GET     /grid                       controllers.Application.showGridView
+GET     /                           controllers.Application.showGridView
 GET     /list                       controllers.Application.showListView
 GET     /show/:id                   controllers.Application.showPlace(id: Int)
 

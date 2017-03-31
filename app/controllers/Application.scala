@@ -48,7 +48,7 @@ class Application @Inject()(val messagesApi: MessagesApi, val reactiveMongoApi: 
 
   def fileNotFound(): Action[AnyContent] = Action{implicit request => NotFound(views.html.notFound())}
 
-  def index(): Action[AnyContent] = Action{implicit request => Redirect(routes.Application.showGridView())}
+  //def index(): Action[AnyContent] = Action{implicit request => Redirect(routes.Application.showGridView())}
 
   def showGridView(): Action[AnyContent] = Action.async { implicit request =>
     placeDAO.getAllPlaces.map(placesList => {
