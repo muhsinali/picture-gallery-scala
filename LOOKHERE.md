@@ -26,4 +26,5 @@ There is also a Java implementation of this project [here](https://github.com/mu
 3. Thumbnails of all images uploaded by the user are programmatically generated for both the grid and list views using [Scrimage](https://github.com/sksamuel/scrimage)
 4. All images that are uploaded by the web app to an Amazon S3 bucket are first converted to progressive JPEGs to improve the web app's perceived performance
 5. Made use of [WebPageTest](https://www.webpagetest.org/) to look for other performance improvements
- 
+  * Added a GZip compression filter to compress server responses
+  * Used browser caching
