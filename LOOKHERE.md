@@ -8,16 +8,7 @@ Picture Gallery
 
 This is a RESTful, CRUD web application that stores places of interest in a database and displays them either using a grid or a list layout back to the user.
 
-The user can add, edit or delete places from the database. It uses the [Play framework](https://www.playframework.com/) and the MVC pattern, and is currently configured to run locally on one's machine.
-
-There is also a Java implementation of this project [here](https://github.com/muhsinali/picture-gallery-java) (rewrote it in Scala so I could learn Scala :grinning:).
-
-
-### Tech stack
-- Scala 2.11.8
-- Play framework (version 2.5.12)
-- MongoDB (ReactiveMongo 0.12.1)
-- HTML, CSS, Bootstrap 3, [Twirl template engine](https://www.playframework.com/documentation/2.5.x/ScalaTemplates)
+The user can add, edit or delete places from the database. It uses the [Play framework](https://www.playframework.com/) and the MVC pattern.
 
 
 ### Key features
@@ -28,3 +19,10 @@ There is also a Java implementation of this project [here](https://github.com/mu
 5. Made use of [WebPageTest](https://www.webpagetest.org/) to look for other performance improvements
     * Added a GZip compression filter to compress server responses
     * Made use of browser caching
+
+
+### Tech stack
+- Scala 2.11.8
+- Play framework (version 2.5.12)
+- MongoDB (ReactiveMongo 0.12.1)
+- HTML, CSS, Bootstrap 3, [Twirl template engine](https://www.playframework.com/documentation/2.5.x/ScalaTemplates)
