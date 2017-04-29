@@ -4,7 +4,7 @@ Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-sc
 
 ### [Try out project here](http://gallery.muhsinali.xyz)
 
-#### [WebPageTest performance results](https://www.webpagetest.org/result/170331_19_6DGB/1/performance_optimization/)
+#### [WebPageTest performance results](https://www.webpagetest.org/result/170331_19_6DGB/5/performance_optimization/)
 
 This is a RESTful, CRUD web application that stores places of interest in a database and displays them either using a grid or a list layout back to the user.
 
@@ -32,7 +32,7 @@ Roadmap
     - [X] Use [Scrimage](https://github.com/sksamuel/scrimage) to dynamically generate thumbnails for every uploaded image (to reduce the size of the images used in the grid and list views)
     - [X] Use Scrimage to ensure all uploaded images are progressive JPEGs; improves perceived performance
     - [X] Use Amazon CloudFront so that static assets are served from the closest edge location; reduces the latency of delivering images
-    - [X] Look for performance improvements using [WebPageTest](https://www.webpagetest.org/) and implement them.
+    - [X] Look for performance improvements using WebPageTest ([performance results](https://www.webpagetest.org/result/170331_19_6DGB/5/performance_optimization/)) and implement them.
     - [ ] Add pagination to limit the number of images shown on the page
 - [ ] Add user authentication
 
