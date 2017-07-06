@@ -3,7 +3,7 @@ Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-sc
 ![alt tag](public/images/pictureGallery.png)
 
 ### [Try out project here](http://gallery.muhsinali.xyz)
-### Note: Uses free dyno so app takes ~30s to boot up from sleep
+#### Note: Uses free dyno so app takes ~30s to boot up from sleep
 
 #### [WebPageTest performance results](https://www.webpagetest.org/result/170331_19_6DGB/5/performance_optimization/)
 
