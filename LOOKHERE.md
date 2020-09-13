@@ -2,9 +2,6 @@ Picture Gallery
 =================================
 ![alt tag](public/images/pictureGallery.png)
 
-### [Try out project here](http://gallery.muhsinali.xyz)
-#### (Uses free dyno so app takes ~30s to boot up from sleep)
-
 #### [WebPageTest performance results](https://www.webpagetest.org/result/170331_19_6DGB/5/performance_optimization/)
 
 This is a RESTful, CRUD web application that stores places of interest in a database and displays them either using a grid or a list layout back to the user.
@@ -13,7 +10,7 @@ The user can add, edit or delete places from the database. It uses the Play fram
 
 
 ### Key features
-1. Used GitFlow and set up a continuous deployment pipeline using [Travis](https://travis-ci.org/muhsinali/picture-gallery-scala) and Heroku
+1. Used GitFlow and set up a continuous deployment pipeline using Travis and Heroku
 2. A 404 page is [displayed](https://github.com/muhsinali/picture-gallery-scala/blob/c3b4a00425caf0c3e65f3bd64f3dcb28fe02ff93/app/ErrorHandler.scala#L14-L20) whenever the user attempts to access a non-existent page
 3. Example Places are [programmatically loaded](https://github.com/muhsinali/picture-gallery-scala/blob/37cb376bca11feaef761ec8ea7576753b7129538/app/services/ApplicationInterceptor.scala#L30-L59) into a Mongo database with corresponding images uploaded to an Amazon S3 bucket at application startup
 4. Static assets are stored using Amazon S3 and served using Amazon CloudFront

@@ -1,9 +1,6 @@
-Introduction [![Build Status](https://travis-ci.org/muhsinali/picture-gallery-scala.svg?branch=master)](https://travis-ci.org/muhsinali/picture-gallery-scala) [![Apache 2.0 License](https://img.shields.io/badge/license-Apache2-green.svg) ](https://github.com/muhsinali/picture-gallery-scala/blob/master/LICENSE) [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+Introduction [![Apache 2.0 License](https://img.shields.io/badge/license-Apache2-green.svg) ](https://github.com/muhsinali/picture-gallery-scala/blob/master/LICENSE)
 =================================
 ![alt tag](public/images/pictureGallery.png)
-
-### [Try out project here](http://gallery.muhsinali.xyz)
-#### (Uses free dyno so app takes ~30s to boot up from sleep)
 
 #### [WebPageTest performance results](https://www.webpagetest.org/result/170331_19_6DGB/5/performance_optimization/)
 
